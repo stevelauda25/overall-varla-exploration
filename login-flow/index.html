@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Flow · Varla</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <!-- ====== Welcome view ====== -->
+      <section
+        class="login-modal login-modal--welcome"
+        role="dialog"
+        aria-labelledby="welcome-title"
+        aria-describedby="welcome-subtitle"
+        data-view="welcome"
+        data-node-id="5813:39404"
+      >
+        <header class="login-modal__hero" data-node-id="5813:39405">
+          <div class="login-modal__icon-ring" aria-hidden="true" data-node-id="5813:39406">
+            <svg
+              class="login-modal__logo"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              data-node-id="5813:39407"
+            >
+              <path d="M14.5744 16.6221C14.7529 16.8043 14.8586 17.0482 14.8709 17.3062L15.6306 33.2961C15.6378 33.4462 15.7081 33.5857 15.8233 33.6784L22.5362 39.0824C22.7801 39.2788 22.9226 39.5793 22.9226 39.8975V47.222C22.9226 47.8029 22.324 48.1784 21.8202 47.9135L7.09844 40.1729C6.33482 39.7714 5.90189 38.9185 6.01896 38.0463L9.50976 12.0381C9.53818 11.8264 9.79012 11.7391 9.93777 11.8898L14.5744 16.6221Z" fill="currentColor"/>
+              <path d="M42.981 38.0463C43.0981 38.9185 42.6652 39.7714 41.9016 40.1729L27.306 47.8471C26.8022 48.112 26.2036 47.7365 26.2036 47.1556V39.8975C26.2036 39.5793 26.3461 39.2788 26.59 39.0824L33.3029 33.6784C33.4181 33.5857 33.4884 33.4462 33.4955 33.2961L34.2564 17.2839C34.2684 17.031 34.3702 16.7915 34.5425 16.6104L39.0564 11.8685C39.2031 11.7144 39.4583 11.8008 39.4869 12.0142L42.981 38.0463Z" fill="currentColor"/>
+              <path d="M30.7613 16.8362C30.9006 16.9387 30.9797 17.1067 30.9714 17.2823L30.3028 31.3565C30.2885 31.6586 30.1462 31.9391 29.9134 32.1245L24.8129 36.1857C24.6292 36.3319 24.3719 36.3305 24.1897 36.1823L19.2045 32.1244C18.9766 31.9388 18.8377 31.6614 18.8236 31.3632L18.1546 17.2792C18.1463 17.1053 18.2238 16.9387 18.3608 16.8359L23.9099 12.6716C24.262 12.4074 24.7396 12.4051 25.0941 12.6659L30.7613 16.8362Z" fill="currentColor"/>
+              <path d="M37.4567 8.28837C37.5897 8.37764 37.6102 8.56941 37.4991 8.68612L32.7855 13.6379C32.6111 13.8211 32.3325 13.846 32.1299 13.6967L25.0937 8.50958C24.7395 8.24843 24.2618 8.25028 23.9095 8.51416L16.9752 13.708C16.7747 13.8582 16.4976 13.8365 16.3216 13.6569L11.4736 8.70873C11.3599 8.5926 11.3792 8.39843 11.5135 8.30832L23.3952 0.337691C24.0664 -0.112565 24.9336 -0.112563 25.6048 0.337694L37.4567 8.28837Z" fill="currentColor"/>
+            </svg>
+          </div>
+
+          <div class="login-modal__copy" data-node-id="5813:39409">
+            <h1 id="welcome-title" class="login-modal__title login-modal__title--lg" data-node-id="5813:39410">
+              Welcome to Varla Protocol
+            </h1>
+            <p id="welcome-subtitle" class="login-modal__subtitle" data-node-id="5813:39411">
+              Borrow, hedge, and stay exposed
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="login-modal__icon-button login-modal__hero-close"
+            aria-label="Close"
+            data-action="close"
+            data-node-id="5813:39412"
+          >
+            <svg width="14" height="14" viewBox="0 0 13.6 13.6" fill="none" aria-hidden="true">
+              <path d="M12.8 0.8L0.8 12.8M0.8 0.8L12.8 12.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <div class="login-modal__actions" data-node-id="5813:39413">
+          <button type="button" class="login-button" data-action="goto-email" data-node-id="5813:39414">
+            <svg class="login-button__icon" viewBox="0 0 21.6 17.6" fill="none" aria-hidden="true">
+              <path d="M20.3 14.8L13.6572 8.8M7.94293 8.8L1.3001 14.8M0.800069 3.8L8.96499 9.51544C9.62616 9.97826 9.95674 10.2097 10.3163 10.2993C10.634 10.3785 10.9662 10.3785 11.2838 10.2993C11.6434 10.2097 11.974 9.97826 12.6351 9.51545L20.8001 3.8M5.60007 16.8H16.0001C17.6802 16.8 18.5203 16.8 19.162 16.473C19.7265 16.1854 20.1855 15.7265 20.4731 15.162C20.8001 14.5202 20.8001 13.6802 20.8001 12V5.6C20.8001 3.91984 20.8001 3.07976 20.4731 2.43803C20.1855 1.87354 19.7265 1.4146 19.162 1.12698C18.5203 0.8 17.6802 0.8 16.0001 0.8H5.60007C3.91991 0.8 3.07983 0.8 2.4381 1.12698C1.87361 1.4146 1.41467 1.87354 1.12705 2.43803C0.800069 3.07976 0.800069 3.91984 0.800069 5.6V12C0.800069 13.6802 0.800069 14.5202 1.12705 15.162C1.41467 15.7265 1.87361 16.1854 2.4381 16.473C3.07983 16.8 3.91991 16.8 5.60007 16.8Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="login-button__label">Log in with email</span>
+          </button>
+
+          <button type="button" class="login-button" data-action="goto-wallet" data-node-id="5813:39415">
+            <svg class="login-button__icon" viewBox="0 0 19.6 20.0319" fill="none" aria-hidden="true">
+              <path d="M13.8001 6.23192V2.73257C13.8001 1.90083 13.8001 1.48496 13.6249 1.22939C13.4719 1.0061 13.2348 0.854411 12.9679 0.808995C12.6624 0.757014 12.2848 0.931288 11.5296 1.27984L2.65916 5.37391C1.98565 5.68476 1.64889 5.84018 1.40225 6.08123C1.1842 6.29433 1.01776 6.55446 0.915647 6.84175C0.800143 7.1667 0.800143 7.53759 0.800143 8.27938V13.2319M14.3001 12.7319H14.3101M0.800143 9.43191L0.800142 16.0319C0.800142 17.152 0.800142 17.7121 1.01813 18.1399C1.20988 18.5162 1.51584 18.8222 1.89216 19.0139C2.31998 19.2319 2.88004 19.2319 4.00014 19.2319H15.6001C16.7202 19.2319 17.2803 19.2319 17.7081 19.0139C18.0844 18.8222 18.3904 18.5162 18.5822 18.1399C18.8001 17.7121 18.8001 17.152 18.8001 16.0319V9.43192C18.8001 8.31181 18.8001 7.75176 18.5822 7.32394C18.3904 6.94761 18.0844 6.64165 17.7081 6.4499C17.2803 6.23192 16.7202 6.23192 15.6001 6.23192L4.00014 6.23191C2.88004 6.23191 2.31999 6.23191 1.89216 6.4499C1.51584 6.64165 1.20988 6.94761 1.01813 7.32393C0.800143 7.75176 0.800143 8.31181 0.800143 9.43191ZM14.8001 12.7319C14.8001 13.0081 14.5763 13.2319 14.3001 13.2319C14.024 13.2319 13.8001 13.0081 13.8001 12.7319C13.8001 12.4558 14.024 12.2319 14.3001 12.2319C14.5763 12.2319 14.8001 12.4558 14.8001 12.7319Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="login-button__label">Log in with wallet</span>
+          </button>
+        </div>
+
+        <p class="login-modal__terms" data-node-id="5813:39416">
+          By logging in, I agree to the
+          <a href="#" class="login-modal__terms-link">Terms</a>
+          &amp;
+          <a href="#" class="login-modal__terms-link">Privacy Policy</a>
+        </p>
+      </section>
+
+      <!-- ====== Email view ====== -->
+      <section
+        class="login-modal login-modal--email is-hidden"
+        role="dialog"
+        aria-labelledby="email-title"
+        data-view="email"
+        data-node-id="2959:3175"
+      >
+        <header class="login-modal__topbar" data-node-id="2959:3176">
+          <button
+            type="button"
+            class="login-modal__icon-button"
+            aria-label="Back"
+            data-action="back"
+            data-target="welcome"
+            data-node-id="2959:3177"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M9 12L4 7L9 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <h1 id="email-title" class="login-modal__title" data-node-id="2959:3178">
+            Enter your email
+          </h1>
+
+          <button
+            type="button"
+            class="login-modal__icon-button"
+            aria-label="Close"
+            data-action="close"
+            data-node-id="2959:3179"
+          >
+            <svg width="14" height="14" viewBox="0 0 13.6 13.6" fill="none" aria-hidden="true">
+              <path d="M12.8 0.8L0.8 12.8M0.8 0.8L12.8 12.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <form class="login-modal__form" data-node-id="2959:3180" novalidate>
+          <div class="email-field" data-node-id="5343:9076">
+            <label class="email-field__label" for="email-input" data-node-id="I5343:9076;3462:2218">
+              Email
+            </label>
+            <input
+              id="email-input"
+              type="email"
+              name="email"
+              class="email-field__input"
+              placeholder="email@example.com"
+              autocomplete="email"
+              spellcheck="false"
+              data-node-id="I5343:9076;3462:2222"
+            />
+            <p class="email-field__error" id="email-error" hidden>
+              Please enter the correct email format
+            </p>
+          </div>
+
+          <div class="login-modal__submit-block" data-node-id="2959:3187">
+            <button type="submit" class="continue-button" data-node-id="6949:9028" disabled>
+              <span class="continue-button__pattern" aria-hidden="true"></span>
+              <span class="continue-button__label">Continue</span>
+            </button>
+            <p class="login-modal__terms" data-node-id="2959:3190">
+              By logging in, I agree to the
+              <a href="#" class="login-modal__terms-link">Terms</a>
+              &amp;
+              <a href="#" class="login-modal__terms-link">Privacy Policy</a>
+            </p>
+          </div>
+        </form>
+      </section>
+
+      <!-- ====== Choose wallet view ====== -->
+      <section
+        class="login-modal login-modal--wallet is-hidden"
+        role="dialog"
+        aria-labelledby="wallet-title"
+        data-view="wallet"
+      >
+        <header class="login-modal__topbar">
+          <button
+            type="button"
+            class="login-modal__icon-button"
+            aria-label="Back"
+            data-action="back"
+            data-target="welcome"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M9 12L4 7L9 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <h1 id="wallet-title" class="login-modal__title">Choose your wallet</h1>
+
+          <button
+            type="button"
+            class="login-modal__icon-button"
+            aria-label="Close"
+            data-action="close"
+          >
+            <svg width="14" height="14" viewBox="0 0 13.6 13.6" fill="none" aria-hidden="true">
+              <path d="M12.8 0.8L0.8 12.8M0.8 0.8L12.8 12.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <div class="wallet-body">
+          <!-- Search bar — only visible after the "Other wallet" expand.
+               Hidden via the [hidden] attribute as a belt-and-braces backup
+               to the .is-expanded CSS rule. -->
+          <div class="wallet-search" hidden>
+            <svg class="wallet-search__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="10" cy="10" r="5.5" stroke="currentColor" stroke-width="1.1"/>
+              <path d="M14.5 14.5L17.5 17.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+            </svg>
+            <input
+              type="text"
+              class="wallet-search__input"
+              id="wallet-search-input"
+              placeholder="Search wallets"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </div>
+
+          <div class="wallet-grid-wrap">
+            <div class="wallet-grid">
+              <!-- Featured 3 — always visible. data-monogram is the fallback
+                   letter shown when assets/<slug>.png is missing. -->
+              <button type="button" class="wallet-option" data-wallet="phantom">
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="P">
+                  <img class="wallet-option__image" src="assets/phantom.png" alt="" />
+                </span>
+                <span class="wallet-option__label">Phantom</span>
+              </button>
+
+              <button type="button" class="wallet-option" data-wallet="family">
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="F">
+                  <img class="wallet-option__image" src="assets/family.png" alt="" />
+                </span>
+                <span class="wallet-option__label">Family</span>
+              </button>
+
+              <button type="button" class="wallet-option" data-wallet="1inch">
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="1">
+                  <img class="wallet-option__image" src="assets/1inch.png" alt="" />
+                </span>
+                <span class="wallet-option__label">1inch Wallet</span>
+              </button>
+
+              <!-- "Other wallet" — collapsed-state expand trigger -->
+              <button type="button" class="wallet-option wallet-option--other-toggle" data-action="expand-wallets">
+                <span class="wallet-option__icon wallet-icon--other" aria-hidden="true">
+                  <svg viewBox="0 0 19.6 20.0319" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M13.8001 6.23192V2.73257C13.8001 1.90083 13.8001 1.48496 13.6249 1.22939C13.4719 1.0061 13.2348 0.854411 12.9679 0.808995C12.6624 0.757014 12.2848 0.931288 11.5296 1.27984L2.65916 5.37391C1.98565 5.68476 1.64889 5.84018 1.40225 6.08123C1.1842 6.29433 1.01776 6.55446 0.915647 6.84175C0.800143 7.1667 0.800143 7.53759 0.800143 8.27938V13.2319M14.3001 12.7319H14.3101M0.800143 9.43191L0.800142 16.0319C0.800142 17.152 0.800142 17.7121 1.01813 18.1399C1.20988 18.5162 1.51584 18.8222 1.89216 19.0139C2.31998 19.2319 2.88004 19.2319 4.00014 19.2319H15.6001C16.7202 19.2319 17.2803 19.2319 17.7081 19.0139C18.0844 18.8222 18.3904 18.5162 18.5822 18.1399C18.8001 17.7121 18.8001 17.152 18.8001 16.0319V9.43192C18.8001 8.31181 18.8001 7.75176 18.5822 7.32394C18.3904 6.94761 18.0844 6.64165 17.7081 6.4499C17.2803 6.23192 16.7202 6.23192 15.6001 6.23192L4.00014 6.23191C2.88004 6.23191 2.31999 6.23191 1.89216 6.4499C1.51584 6.64165 1.20988 6.94761 1.01813 7.32393C0.800143 7.75176 0.800143 8.31181 0.800143 9.43191ZM14.8001 12.7319C14.8001 13.0081 14.5763 13.2319 14.3001 13.2319C14.024 13.2319 13.8001 13.0081 13.8001 12.7319C13.8001 12.4558 14.024 12.2319 14.3001 12.2319C14.5763 12.2319 14.8001 12.4558 14.8001 12.7319Z"
+                      stroke="currentColor"
+                      stroke-width="1.6"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </span>
+                <span class="wallet-option__label">Other wallet</span>
+              </button>
+
+              <!-- Additional 10 — alphabetical, hidden until "Other wallet" is clicked.
+                   Each carries [hidden] so they're truly absent on first paint. -->
+              <button type="button" class="wallet-option wallet-option--additional" data-wallet="argent" hidden>
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="A">
+                  <img class="wallet-option__image" src="assets/argent.svg" alt="" />
+                </span>
+                <span class="wallet-option__label">Argent</span>
+              </button>
+
+              <button type="button" class="wallet-option wallet-option--additional" data-wallet="backpack" hidden>
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="B">
+                  <img class="wallet-option__image" src="assets/backpack.svg" alt="" />
+                </span>
+                <span class="wallet-option__label">Backpack</span>
+              </button>
+
+              <button type="button" class="wallet-option wallet-option--additional" data-wallet="brave" hidden>
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="B">
+                  <img class="wallet-option__image" src="assets/brave.svg" alt="" />
+                </span>
+                <span class="wallet-option__label">Brave Wallet</span>
+              </button>
+
+              <button type="button" class="wallet-option wallet-option--additional" data-wallet="exodus" hidden>
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="E">
+                  <img class="wallet-option__image" src="assets/exodus.svg" alt="" />
+                </span>
+                <span class="wallet-option__label">Exodus</span>
+              </button>
+
+              <button type="button" class="wallet-option wallet-option--additional" data-wallet="ledger" hidden>
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="L">
+                  <img class="wallet-option__image" src="assets/ledger.svg" alt="" />
+                </span>
+                <span class="wallet-option__label">Ledger</span>
+              </button>
+
+              <button type="button" class="wallet-option wallet-option--additional" data-wallet="metamask" hidden>
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="M">
+                  <img class="wallet-option__image" src="assets/metamask.svg" alt="" />
+                </span>
+                <span class="wallet-option__label">MetaMask</span>
+              </button>
+
+              <button type="button" class="wallet-option wallet-option--additional" data-wallet="okx" hidden>
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="O">
+                  <img class="wallet-option__image" src="assets/okx.svg" alt="" />
+                </span>
+                <span class="wallet-option__label">OKX Wallet</span>
+              </button>
+
+              <button type="button" class="wallet-option wallet-option--additional" data-wallet="rainbow" hidden>
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="R">
+                  <img class="wallet-option__image" src="assets/rainbow.svg" alt="" />
+                </span>
+                <span class="wallet-option__label">Rainbow</span>
+              </button>
+
+              <button type="button" class="wallet-option wallet-option--additional" data-wallet="trust" hidden>
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="T">
+                  <img class="wallet-option__image" src="assets/trust.svg" alt="" />
+                </span>
+                <span class="wallet-option__label">Trust Wallet</span>
+              </button>
+
+              <button type="button" class="wallet-option wallet-option--additional" data-wallet="zerion" hidden>
+                <span class="wallet-option__icon" aria-hidden="true" data-monogram="Z">
+                  <img class="wallet-option__image" src="assets/zerion.svg" alt="" />
+                </span>
+                <span class="wallet-option__label">Zerion</span>
+              </button>
+            </div>
+
+            <p class="wallet-empty" id="wallet-empty" hidden>No wallets match your search.</p>
+          </div>
+
+          <p class="login-modal__terms">
+            By logging in, I agree to the
+            <a href="#" class="login-modal__terms-link">Terms</a>
+            &amp;
+            <a href="#" class="login-modal__terms-link">Privacy Policy</a>
+          </p>
+        </div>
+      </section>
+
+      <!-- ====== Wallet QR connect view ====== -->
+      <section
+        class="login-modal login-modal--wallet-connect is-hidden"
+        role="dialog"
+        aria-labelledby="wallet-connect-title"
+        data-view="wallet-connect"
+      >
+        <header class="login-modal__topbar login-modal__topbar--borderless">
+          <button
+            type="button"
+            class="login-modal__icon-button"
+            aria-label="Back"
+            data-action="back"
+            data-target="wallet"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M9 12L4 7L9 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            class="login-modal__icon-button"
+            aria-label="Close"
+            data-action="close"
+          >
+            <svg width="14" height="14" viewBox="0 0 13.6 13.6" fill="none" aria-hidden="true">
+              <path d="M12.8 0.8L0.8 12.8M0.8 0.8L12.8 12.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <div class="wallet-connect-body">
+          <!-- Loading overlay — appears 3s after the QR renders, runs for 2s,
+               then the success modal takes over. -->
+          <div class="loading-overlay" id="wallet-connect-loading" aria-hidden="true">
+            <svg class="loading-spinner" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Loading">
+              <g stroke="white" stroke-width="2" stroke-linecap="round">
+                <line x1="16" y1="3" x2="16" y2="9" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.92" transform="rotate(30 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.85" transform="rotate(60 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.77" transform="rotate(90 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.69" transform="rotate(120 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.62" transform="rotate(150 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.54" transform="rotate(180 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.46" transform="rotate(210 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.38" transform="rotate(240 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.31" transform="rotate(270 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.23" transform="rotate(300 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.15" transform="rotate(330 16 16)" />
+              </g>
+            </svg>
+          </div>
+
+          <h1 id="wallet-connect-title" class="wallet-connect__title">
+            Scan code to connect with <span data-wallet-name>Phantom</span> wallet
+          </h1>
+
+          <div class="wallet-connect__qr">
+            <div class="wallet-connect__qr-pattern" id="qr-pattern" aria-hidden="true"></div>
+          </div>
+
+          <p class="login-modal__terms">
+            By logging in, I agree to the
+            <a href="#" class="login-modal__terms-link">Terms</a>
+            &amp;
+            <a href="#" class="login-modal__terms-link">Privacy Policy</a>
+          </p>
+        </div>
+      </section>
+
+      <!-- ====== Confirmation code view ====== -->
+      <section
+        class="login-modal login-modal--confirm is-hidden"
+        role="dialog"
+        aria-labelledby="confirm-title"
+        data-view="confirm"
+      >
+        <header class="login-modal__topbar">
+          <button
+            type="button"
+            class="login-modal__icon-button"
+            aria-label="Back"
+            data-action="back"
+            data-target="email"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M9 12L4 7L9 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <h1 id="confirm-title" class="login-modal__title">
+            Enter confirmation code
+          </h1>
+
+          <button
+            type="button"
+            class="login-modal__icon-button"
+            aria-label="Close"
+            data-action="close"
+          >
+            <svg width="14" height="14" viewBox="0 0 13.6 13.6" fill="none" aria-hidden="true">
+              <path d="M12.8 0.8L0.8 12.8M0.8 0.8L12.8 12.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </header>
+
+        <div class="confirm-body">
+          <!-- Loading overlay — covers the body while the entered code is verifying.
+               Topbar stays interactive so the user can still go back. -->
+          <div class="loading-overlay" id="confirm-loading" aria-hidden="true">
+            <svg class="loading-spinner" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Loading">
+              <g stroke="white" stroke-width="2" stroke-linecap="round">
+                <line x1="16" y1="3" x2="16" y2="9" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.92" transform="rotate(30 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.85" transform="rotate(60 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.77" transform="rotate(90 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.69" transform="rotate(120 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.62" transform="rotate(150 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.54" transform="rotate(180 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.46" transform="rotate(210 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.38" transform="rotate(240 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.31" transform="rotate(270 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.23" transform="rotate(300 16 16)" />
+                <line x1="16" y1="3" x2="16" y2="9" opacity="0.15" transform="rotate(330 16 16)" />
+              </g>
+            </svg>
+          </div>
+
+          <div class="confirm-body__hero">
+            <svg
+              class="confirm-body__mail"
+              viewBox="0 0 21.6 17.6"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <path
+                d="M20.3 14.8L13.6572 8.8M7.94293 8.8L1.3001 14.8M0.800069 3.8L8.96499 9.51544C9.62616 9.97826 9.95674 10.2097 10.3163 10.2993C10.634 10.3785 10.9662 10.3785 11.2838 10.2993C11.6434 10.2097 11.974 9.97826 12.6351 9.51545L20.8001 3.8M5.60007 16.8H16.0001C17.6802 16.8 18.5203 16.8 19.162 16.473C19.7265 16.1854 20.1855 15.7265 20.4731 15.162C20.8001 14.5202 20.8001 13.6802 20.8001 12V5.6C20.8001 3.91984 20.8001 3.07976 20.4731 2.43803C20.1855 1.87354 19.7265 1.4146 19.162 1.12698C18.5203 0.8 17.6802 0.8 16.0001 0.8H5.60007C3.91991 0.8 3.07983 0.8 2.4381 1.12698C1.87361 1.4146 1.41467 1.87354 1.12705 2.43803C0.800069 3.07976 0.800069 3.91984 0.800069 5.6V12C0.800069 13.6802 0.800069 14.5202 1.12705 15.162C1.41467 15.7265 1.87361 16.1854 2.4381 16.473C3.07983 16.8 3.91991 16.8 5.60007 16.8Z"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+
+            <p class="confirm-body__description">
+              Please check
+              <span data-confirm-email>your email</span>
+              for an email from privy.io and enter your code bellow.
+            </p>
+          </div>
+
+          <div class="confirm-otp">
+            <div class="otp-input" role="group" aria-label="Confirmation code">
+              <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1" />
+              <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 2" />
+              <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 3" />
+              <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 4" />
+              <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 5" />
+              <input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 6" />
+            </div>
+            <p class="confirm-otp__error" id="otp-error" hidden>
+              Invalid code. Double-check the email and try again.
+            </p>
+          </div>
+
+          <p class="confirm-resend">
+            Didn&rsquo;t get an email?
+            <button type="button" class="confirm-resend__link" data-action="resend">Resend code</button>
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- ====== Login success overlay — appears ~2s after correct OTP ====== -->
+    <div
+      class="success-overlay"
+      id="login-success"
+      role="dialog"
+      aria-labelledby="success-title"
+      aria-modal="true"
+    >
+      <section class="success-modal">
+        <button
+          type="button"
+          class="success-modal__close"
+          data-action="dismiss-success"
+          aria-label="Close"
+        >
+          <svg width="14" height="14" viewBox="0 0 13.6 13.6" fill="none" aria-hidden="true">
+            <path d="M12.8 0.8L0.8 12.8M0.8 0.8L12.8 12.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <div class="success-modal__hero">
+          <div class="success-modal__icon-ring" aria-hidden="true">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <circle class="success-icon__circle" cx="18" cy="18" r="14" transform="rotate(-90 18 18)" stroke="white" stroke-width="2.5" />
+              <path class="success-icon__check" d="M11.5 18.5 L16 23 L24.5 13.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
+          </div>
+          <div class="success-modal__copy">
+            <h2 id="success-title" class="success-modal__title">Login successful</h2>
+            <p class="success-modal__description">Welcome to Varla Protocol</p>
+          </div>
+        </div>
+
+        <button type="button" class="continue-button" data-action="dismiss-success">
+          <span class="continue-button__pattern" aria-hidden="true"></span>
+          <span class="continue-button__label">Get started</span>
+        </button>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

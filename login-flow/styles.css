@@ -1,0 +1,1142 @@
+/* =========================================================================
+   Design tokens (mapped from Figma variables)
+   ========================================================================= */
+:root {
+  /* Surfaces */
+  --base-special: #091325;
+  --primary-special: #0c1931;
+  --input-bg: #061022;
+  --page-bg: #04081a;
+  --base-white: #ffffff;
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.5);
+  --text-tertiary: rgba(255, 255, 255, 0.3);
+  --text-brand: #00051c;
+
+  /* Accents */
+  --accent-red: #e14747;
+
+  /* Alpha overlays */
+  --alpha-white-600: rgba(255, 255, 255, 0.3);
+  --alpha-white-800: rgba(255, 255, 255, 0.1);
+  --alpha-white-900: rgba(255, 255, 255, 0.05);
+
+  /* Type */
+  --font-serif: "EB Garamond", "Times New Roman", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  /* Sizing */
+  --modal-width: 476px;
+  --card-radius: 6px;
+  --button-radius: 2px;
+  --input-radius: 2px;
+  --field-radius: 4px;
+}
+
+/* =========================================================================
+   Reset / base
+   ========================================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--page-bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+p {
+  margin: 0;
+}
+
+input {
+  font: inherit;
+  color: inherit;
+}
+
+/* =========================================================================
+   Page wrapper
+   ========================================================================= */
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+/* =========================================================================
+   Modal shell — shared between welcome and email views
+   ========================================================================= */
+.login-modal {
+  position: relative;
+  width: 100%;
+  max-width: var(--modal-width);
+  background: var(--base-special);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: var(--card-radius);
+  box-shadow:
+    0 4px 4px 0 rgba(0, 0, 0, 0.1),
+    inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
+  overflow: clip;
+  transition: opacity 0.2s ease;
+}
+
+/* Hidden view — kept in DOM, faded out */
+.login-modal.is-hidden {
+  display: none;
+}
+
+/* Shared title — used on both welcome hero and email topbar */
+.login-modal__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* Shared icon buttons — close & back */
+.login-modal__icon-button {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--alpha-white-600);
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.login-modal__icon-button:hover {
+  color: var(--text-primary);
+}
+
+.login-modal__icon-button:focus-visible {
+  outline: 2px solid rgba(122, 169, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Shared terms text */
+.login-modal__terms {
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+
+.login-modal__terms-link {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 2px;
+  transition: opacity 0.15s ease;
+}
+
+.login-modal__terms-link:hover {
+  opacity: 0.8;
+}
+
+/* =========================================================================
+   Welcome view — node 5813:39404
+   ========================================================================= */
+.login-modal--welcome {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.login-modal__hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.login-modal__icon-ring {
+  width: 96px;
+  height: 96px;
+  padding: 24px;
+  background: var(--primary-special);
+  border: 1px dashed var(--alpha-white-800);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--text-primary);
+}
+
+.login-modal__logo {
+  width: 48px;
+  height: 48px;
+  display: block;
+}
+
+.login-modal__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  width: 100%;
+}
+
+.login-modal__title--lg {
+  /* Welcome title sits in the hero block — no override needed yet */
+}
+
+.login-modal__subtitle {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+
+.login-modal__hero-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.login-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.login-button {
+  position: relative;
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 24px;
+  background: var(--alpha-white-900);
+  border: 0.6px solid var(--alpha-white-800);
+  border-radius: var(--button-radius);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+.login-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.login-button:active {
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(1px);
+}
+
+.login-button:focus-visible {
+  outline: 2px solid rgba(122, 169, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.login-button__icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+.login-button__label {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.3;
+  letter-spacing: -0.16px;
+  white-space: nowrap;
+}
+
+/* =========================================================================
+   Choose wallet view
+   ========================================================================= */
+.login-modal--wallet {
+  display: flex;
+  flex-direction: column;
+}
+
+.wallet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 24px;
+  width: 100%;
+}
+
+/* Expanded mode — search bar visible, additional wallets revealed.
+   Tighter gap (16px) between search and grid; grid-wrap caps height so the
+   terms stay pinned at the bottom and the list scrolls inside. */
+.wallet-body.is-expanded {
+  gap: 16px;
+}
+
+.wallet-grid-wrap {
+  width: 100%;
+}
+
+/* Expanded mode — scrolling lives on the inner .wallet-grid (not the wrap)
+   so we can offset its right edge past the wrap and put the scrollbar in a
+   gutter outside the columns. The wrap stays at content-area width so the
+   search bar above stays aligned with the columns. */
+.wallet-body.is-expanded .wallet-grid {
+  /* 3 full rows (3*72 button + 2*16 gap = 248) + ~30% of a 4th row (~46)
+     ≈ 294px. Caps the view to 6 wallets fully visible + 2 peeking. */
+  max-height: 296px;
+  overflow-y: auto;
+  /* width = wrap + 12px gutter; padding-right keeps the grid's *content*
+     area equal to wrap width, so columns don't shrink when the scrollbar
+     appears. The scrollbar lives in the 12px gutter, visually outside the
+     columns and not reserving any layout width inside the wrap. */
+  width: calc(100% + 12px);
+  padding-right: 12px;
+}
+
+.wallet-grid::-webkit-scrollbar {
+  width: 6px;
+}
+
+.wallet-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Invisible at rest — JS toggles `.is-scrolling` only while the user is
+   actively scrolling, so the thumb fades in then out a beat after they stop. */
+.wallet-grid::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 3px;
+  transition: background-color 0.4s ease;
+}
+
+.wallet-grid.is-scrolling::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+  transition-duration: 0.05s;
+}
+
+.wallet-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Search bar — Figma spec applied verbatim:
+     bg #070E1D, 1px @ 10% white border, inset 0 0 3px 2px rgba(0,0,0,0.1),
+     6px radius, 56px tall, 16px padding, 12px icon→input gap.
+   Hidden initially via [hidden]; shown by JS when "Other wallet" is clicked. */
+.wallet-search {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  width: 100%;
+  height: 56px;
+  background: #070e1d;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  box-shadow: inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.wallet-search[hidden] {
+  display: none;
+}
+
+.wallet-search__icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.wallet-search__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.1;
+  caret-color: var(--text-primary);
+}
+
+.wallet-search__input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Native [hidden] handles initial state for the additional wallets and the
+   Other-wallet toggle. JS flips the attribute when expanding/collapsing. */
+
+/* Empty state for the search filter */
+.wallet-empty {
+  margin: 24px 0 0;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+
+.wallet-empty[hidden] {
+  display: none;
+}
+
+.wallet-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--alpha-white-900);
+  border: 0.6px solid var(--alpha-white-800);
+  border-radius: var(--button-radius);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.05s ease;
+}
+
+.wallet-option[hidden] {
+  display: none;
+}
+
+.wallet-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.wallet-option:active {
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(1px);
+}
+
+.wallet-option:focus-visible {
+  outline: 2px solid rgba(122, 169, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.wallet-option__icon {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--alpha-white-800);
+}
+
+/* Monogram fallback — visible only when the brand PNG fails to load.
+   The img sits on top via z-index; if onerror removes the img, this letter
+   stays visible on the dim default background. */
+.wallet-option__icon::before {
+  content: attr(data-monogram);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+}
+
+/* Brand PNGs fill their 48×48 container, sitting above the monogram */
+.wallet-option__image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  z-index: 1;
+}
+
+/* "Other wallet" — dim container with a small wallet icon centered inside */
+.wallet-icon--other {
+  background: var(--alpha-white-900);
+  border: 1px solid var(--alpha-white-800);
+  color: var(--text-primary);
+}
+
+.wallet-icon--other svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.wallet-option__label {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.3;
+  letter-spacing: -0.16px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================================================================
+   Wallet QR connect view — appears when a wallet is picked.
+   Topbar drops its bottom border; the title moves into the body so it sits
+   above the QR card.
+   ========================================================================= */
+.login-modal--wallet-connect {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-modal__topbar--borderless {
+  border-bottom-color: transparent;
+}
+
+.wallet-connect-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  padding: 24px;
+  width: 100%;
+}
+
+.wallet-connect__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--text-primary);
+  text-align: center;
+  max-width: 340px;
+}
+
+/* Frame spec from Figma: 372×372, 32px padding (so the QR pattern lives in
+   a 308×308 inner area), 32px corner radius, near-black bg #00051C with a
+   subtle 10%-white hairline border and stacked drop + inner shadows. */
+.wallet-connect__qr {
+  width: 100%;
+  max-width: 372px;
+  aspect-ratio: 1;
+  background: #00051c;
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 32px;
+  padding: 32px;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 0.5px 0.5px 0 rgba(0, 0, 0, 0.06),
+    0 2px 0.5px 0 rgba(0, 0, 0, 0.04),
+    inset 0 1.5px 1px 0 rgba(0, 0, 0, 0.25),
+    inset 0 0.5px 0.5px 0 rgba(255, 255, 255, 0.1);
+}
+
+.wallet-connect__qr-pattern {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.wallet-connect__qr-pattern svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* =========================================================================
+   Email view — node 2959:3175
+   ========================================================================= */
+.login-modal--email {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-modal__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid var(--alpha-white-800);
+  width: 100%;
+}
+
+.login-modal__form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 46px;
+  padding: 24px;
+  width: 100%;
+}
+
+/* Email field — outer rounded card */
+.email-field {
+  position: relative;
+  width: 100%;
+  background: var(--primary-special);
+  border: 1px solid var(--alpha-white-900);
+  border-radius: var(--field-radius);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: inset 0 0 2px 2px rgba(0, 0, 0, 0.12);
+}
+
+.email-field__label {
+  display: block;
+  padding: 4px 12px 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+/* Inner input field — bg #061022, dim border, focus brightens */
+.email-field__input {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-primary);
+  background: var(--input-bg);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: var(--input-radius);
+  outline: none;
+  caret-color: var(--text-primary);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 0 2px 1.5px rgba(0, 0, 0, 0.08);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.email-field__input::placeholder {
+  color: var(--text-secondary);
+}
+
+.email-field__input:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 2px 1.5px rgba(0, 0, 0, 0.08);
+}
+
+/* Error state — overrides border (focused or not) */
+.email-field.has-error .email-field__input,
+.email-field.has-error .email-field__input:focus {
+  border-color: var(--accent-red);
+  box-shadow:
+    0 0 0 1px rgba(225, 71, 71, 0.15),
+    inset 0 0 2px 1.5px rgba(0, 0, 0, 0.08);
+}
+
+.email-field__error {
+  padding: 0 12px 4px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--accent-red);
+}
+
+.email-field__error[hidden] {
+  display: none;
+}
+
+/* Submit block — Continue button + terms text */
+.login-modal__submit-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+/* =========================================================================
+   Continue button — primary white button
+   States layered via pseudo-classes:
+     default → bg 100% white, strong top white inset
+     hover   → same white, deeper drop shadow (lifted)
+     pressed → bg 70% white + downward gradient, softer insets
+     disabled→ bg 10% white, text tertiary, no top inset
+   ========================================================================= */
+.continue-button {
+  position: relative;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--button-radius);
+  background-color: var(--base-white);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    0 2px 2px 0 rgba(0, 0, 0, 0.25),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.1);
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.continue-button:not(:disabled):hover {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 4px 12px 0 rgba(0, 0, 0, 0.4),
+    inset 0 3px 6px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.08);
+}
+
+.continue-button:not(:disabled):active {
+  background-color: rgba(255, 255, 255, 0.7);
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    0 2px 2px 0 rgba(0, 0, 0, 0.25),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+.continue-button:disabled {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: not-allowed;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    0 2px 2px 0 rgba(0, 0, 0, 0.25),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.continue-button:disabled .continue-button__label {
+  color: var(--text-tertiary);
+}
+
+.continue-button__pattern {
+  position: absolute;
+  inset: 0;
+  background-image: url("assets/button-bg.png");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.04;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.continue-button:disabled .continue-button__pattern {
+  opacity: 0.02;
+}
+
+.continue-button:not(:disabled):hover .continue-button__pattern {
+  opacity: 0.01;
+}
+
+.continue-button:not(:disabled):active .continue-button__pattern {
+  opacity: 0.03;
+}
+
+.continue-button__label {
+  position: relative;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-brand);
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+/* =========================================================================
+   Confirmation code view
+   ========================================================================= */
+.login-modal--confirm {
+  display: flex;
+  flex-direction: column;
+}
+
+.confirm-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding: 32px 24px;
+  width: 100%;
+}
+
+/* Loading overlay — sits over confirm-body while verifying the entered code.
+   Same spoke-star spinner used in the deposit-modal exploration. */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 14, 29, 0.5);
+  display: grid;
+  place-items: center;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.confirm-body.is-loading .loading-overlay,
+.wallet-connect-body.is-loading .loading-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  animation: loading-tick 1s steps(12) infinite;
+  transform-origin: center;
+}
+
+@keyframes loading-tick {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.confirm-body__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.confirm-body__mail {
+  width: 48px;
+  height: 39px;
+  display: block;
+  color: var(--text-primary);
+}
+
+.confirm-body__description {
+  max-width: 380px;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+
+/* OTP wrapper — container + error message stack, kept tight (16px) so the
+   error sits with the boxes rather than drifting toward the resend prompt. */
+.confirm-otp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.confirm-otp__error {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--accent-red);
+  text-align: center;
+}
+
+.confirm-otp__error[hidden] {
+  display: none;
+}
+
+/* OTP — outer rounded container holds 6 individual digit boxes,
+   same shell pattern as the email field on the previous step. */
+.otp-input {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--primary-special);
+  border: 1px solid var(--alpha-white-900);
+  border-radius: var(--card-radius);
+  box-shadow: inset 0 0 2px 2px rgba(0, 0, 0, 0.12);
+}
+
+.otp-box {
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text-primary);
+  background: var(--input-bg);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: var(--field-radius);
+  outline: none;
+  caret-color: var(--text-primary);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    inset 0 0 2px 1.5px rgba(0, 0, 0, 0.08);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+  -moz-appearance: textfield;
+}
+
+.otp-box::-webkit-outer-spin-button,
+.otp-box::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.otp-box:focus {
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 2px 1.5px rgba(0, 0, 0, 0.08);
+}
+
+/* Error state — only the boxes go red; outer container keeps its default border */
+.confirm-otp.has-error .otp-box,
+.confirm-otp.has-error .otp-box:focus {
+  border-color: var(--accent-red);
+  box-shadow:
+    0 0 0 1px rgba(225, 71, 71, 0.15),
+    inset 0 0 2px 1.5px rgba(0, 0, 0, 0.08);
+}
+
+/* Resend prompt */
+.confirm-resend {
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+
+.confirm-resend__link {
+  font: inherit;
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.confirm-resend__link:hover {
+  opacity: 0.8;
+}
+
+.confirm-resend__link:focus-visible {
+  outline: 2px solid rgba(122, 169, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* =========================================================================
+   Login success modal — appears ~2s after correct OTP
+   Same shell + checkmark animation as deposit-modal's success-modal,
+   sized to match the login flow's modal width and stripped of the summary.
+   ========================================================================= */
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.success-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.success-modal {
+  position: relative;
+  width: var(--modal-width);
+  max-width: 100%;
+  background: var(--base-special);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: var(--card-radius);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow:
+    0 4px 4px 0 rgba(0, 0, 0, 0.1),
+    inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
+  transform: scale(0.96);
+  transition: transform 0.2s ease;
+}
+
+.success-overlay.is-open .success-modal {
+  transform: scale(1);
+}
+
+.success-modal__close {
+  position: absolute;
+  top: 19px;
+  right: 19px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--alpha-white-600);
+  transition: color 0.15s ease;
+}
+
+.success-modal__close:hover {
+  color: var(--text-primary);
+}
+
+.success-modal__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.success-modal__icon-ring {
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-special);
+  border: 1px dashed var(--alpha-white-800);
+  border-radius: 999px;
+}
+
+/* Checkmark sequence on open:
+   1. Circle stroke draws (0 → 0.4s)
+   2. Check path draws    (0.35 → 0.65s)
+   3. Whole icon bounces  (0.65 → 1.15s) */
+.success-icon__circle {
+  stroke-dasharray: 88;
+  stroke-dashoffset: 88;
+}
+
+.success-icon__check {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+}
+
+.success-overlay.is-open .success-icon__circle {
+  animation: success-draw-circle 0.4s ease-out forwards;
+}
+
+.success-overlay.is-open .success-icon__check {
+  animation: success-draw-check 0.3s ease-out 0.35s forwards;
+}
+
+.success-overlay.is-open .success-modal__icon-ring > svg {
+  animation: success-icon-bounce 0.5s ease-out 0.65s;
+  transform-origin: center center;
+}
+
+@keyframes success-draw-circle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes success-draw-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes success-icon-bounce {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.22); }
+  50% { transform: scale(0.9); }
+  72% { transform: scale(1.08); }
+  88% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+.success-modal__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.success-modal__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.success-modal__description {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
