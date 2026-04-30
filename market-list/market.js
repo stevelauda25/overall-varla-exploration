@@ -1898,15 +1898,14 @@ detailTabs.forEach((tab) => {
   }
 
   // Set chance + delta to the values for sample at index `idx`. Delta
-  // is always computed against the FIRST sample of the active series,
-  // so it reads as "change since start of period" — same semantic as
-  // the PnL graph's delta.
+  // is the tick-by-tick change: sample[idx] − sample[idx−1]. At idx=0
+  // there's no predecessor, so delta falls back to 0.
   function setHeadline(idx, animate) {
     if (!activeSeries.length) return;
     const yes = activeSeries[idx].yes;
-    const firstYes = activeSeries[0].yes;
+    const prevYes = idx > 0 ? activeSeries[idx - 1].yes : yes;
     const chancePct = yes * 100;
-    const deltaPct = (yes - firstYes) * 100;
+    const deltaPct = (yes - prevYes) * 100;
     const dur = animate ? 280 : 0;
     if (chanceEl) {
       tweenNumber(
@@ -2026,8 +2025,8 @@ detailTabs.forEach((tab) => {
     crosshair.querySelector(".graph__crosshair-row--yes strong").textContent = `${yesPctTxt}%`;
     crosshair.querySelector(".graph__crosshair-row--no strong").textContent = `${noPctTxt}%`;
     crosshair.hidden = false;
-    // Headline tracks the hovered point; delta = (hovered - first) so
-    // it reads as "where this period started → where the cursor is now".
+    // Headline tracks the hovered point; delta = (hovered − previous
+    // sample), so it reads as the tick change at that point.
     setHeadline(idx, true);
     // Hand off the pulsing affordance to the crosshair dot — two
     // pulsing circles on the same chart would just visually compete.
@@ -2313,14 +2312,13 @@ detailTabs.forEach((tab) => {
   }
 
   // Set headline value + delta to the values for sample at index `idx`.
-  // Delta is always (sample - first sample of active series), so it
-  // reads as "change since start of period" — same semantic as the
-  // probability graph's delta.
+  // Delta is the tick-by-tick change: sample[idx] − sample[idx−1]. At
+  // idx=0 there's no predecessor, so delta falls back to 0.
   function setHeadline(idx) {
     if (!activeSeries.length) return;
     const v = activeSeries[idx].v;
-    const firstV = activeSeries[0].v;
-    const change = v - firstV;
+    const prevV = idx > 0 ? activeSeries[idx - 1].v : v;
+    const change = v - prevV;
     if (valueEl) {
       tweenNumber(valueEl, v, formatPnl);
     }
@@ -2395,7 +2393,8 @@ detailTabs.forEach((tab) => {
     crosshair.querySelector(".graph__crosshair-row--yes strong").textContent =
       formatPnl(sample.v);
     crosshair.hidden = false;
-    // Headline tracks the hovered point; delta = (hovered - first).
+    // Headline tracks the hovered point; delta = (hovered − previous
+    // sample) — the tick change at that point.
     setHeadline(idx);
     if (endDotEl) endDotEl.hidden = true;
   });
