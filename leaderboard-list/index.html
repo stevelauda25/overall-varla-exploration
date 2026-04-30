@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard · Varla</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="leaderboard.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="leaderboard" aria-label="Leaderboard">
+        <!-- ============================================================
+             SEARCH ROW
+             ============================================================ -->
+        <div class="search-row">
+          <label class="search-row__input">
+            <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.6" />
+              <path d="m17 17-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+            </svg>
+            <input type="text" placeholder="Search username or address" />
+          </label>
+
+          <div class="search-row__filters">
+            <div class="filter-dropdown" data-filter="league">
+              <button type="button" class="filter-btn" data-dropdown-toggle aria-haspopup="listbox" aria-expanded="false">
+                <svg class="icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M4 2h6v3a3 3 0 1 1-6 0V2Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                  <path d="M2 3h2M10 3h2M5 8.5h4M6 11h2v1.5H6z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+                <span class="filter-btn__label">All Leagues</span>
+                <svg class="icon icon--chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="m4 5.5 3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <div class="filter-menu" role="listbox" hidden>
+                <button type="button" class="filter-menu__item" data-value="bronze" role="option">
+                  <span class="tier tier--sm tier--bronze"></span>
+                  <span class="filter-menu__label">Bronze</span>
+                  <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <button type="button" class="filter-menu__item" data-value="silver" role="option">
+                  <span class="tier tier--sm tier--silver"></span>
+                  <span class="filter-menu__label">Silver</span>
+                  <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <button type="button" class="filter-menu__item" data-value="gold" role="option">
+                  <span class="tier tier--sm tier--gold"></span>
+                  <span class="filter-menu__label">Gold</span>
+                  <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <button type="button" class="filter-menu__item" data-value="platinum" role="option">
+                  <span class="tier tier--sm tier--platinum"></span>
+                  <span class="filter-menu__label">Platinum</span>
+                  <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <button type="button" class="filter-menu__item" data-value="diamond" role="option">
+                  <span class="tier tier--sm tier--diamond"></span>
+                  <span class="filter-menu__label">Diamond</span>
+                  <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="filter-dropdown" data-filter="time">
+              <button type="button" class="filter-btn" data-dropdown-toggle aria-haspopup="listbox" aria-expanded="false">
+                <svg class="icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M7 4.5V7l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+                <span class="filter-btn__label">All time</span>
+                <svg class="icon icon--chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="m4 5.5 3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <div class="filter-menu" role="listbox" hidden>
+                <button type="button" class="filter-menu__item" data-value="today" role="option">
+                  <span class="filter-menu__label">Today</span>
+                  <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <button type="button" class="filter-menu__item" data-value="week" role="option">
+                  <span class="filter-menu__label">This week</span>
+                  <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <button type="button" class="filter-menu__item" data-value="month" role="option">
+                  <span class="filter-menu__label">This Month</span>
+                  <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <button type="button" class="filter-menu__item is-selected" data-value="all" role="option">
+                  <span class="filter-menu__label">All time</span>
+                  <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="filter-dropdown" data-filter="rank">
+              <button type="button" class="filter-btn" data-dropdown-toggle aria-haspopup="dialog" aria-expanded="false">
+                <svg class="icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M5 2 4 12M9 2 8 12M2 5h10M2 9h10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+                <span class="filter-btn__label">Rank range</span>
+                <svg class="icon icon--chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="m4 5.5 3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <div class="filter-menu filter-menu--range" role="dialog" hidden>
+                <h3 class="range-panel__title">Rank range</h3>
+                <div class="range-slider">
+                  <div class="range-slider__track" aria-hidden="true"></div>
+                  <div class="range-slider__fill" aria-hidden="true"></div>
+                  <input type="range" class="range-slider__input range-slider__input--min" min="1" max="500" value="1" aria-label="Minimum rank" />
+                  <input type="range" class="range-slider__input range-slider__input--max" min="1" max="500" value="500" aria-label="Maximum rank" />
+                </div>
+                <div class="range-panel__inputs">
+                  <label class="range-input">
+                    <span class="range-input__label">Min</span>
+                    <span class="range-input__field">
+                      <span class="range-input__prefix">#</span>
+                      <input type="number" class="range-input__number" data-bound="min" min="1" max="500" placeholder="0" />
+                    </span>
+                  </label>
+                  <label class="range-input">
+                    <span class="range-input__label">Max</span>
+                    <span class="range-input__field">
+                      <span class="range-input__prefix">#</span>
+                      <input type="number" class="range-input__number" data-bound="max" min="1" max="500" placeholder="0" />
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-dropdown" data-filter="gems">
+              <button type="button" class="filter-btn" data-dropdown-toggle aria-haspopup="dialog" aria-expanded="false">
+                <svg class="icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M3.5 3h7l2 3-5.5 6L1.5 6l2-3Z" fill="#7AA9FF" stroke="#A8C7FF" stroke-width="0.8" stroke-linejoin="round" />
+                  <path d="M5 3 7 6l2-3M3.5 6h7" stroke="#A8C7FF" stroke-width="0.8" stroke-linejoin="round" opacity=".6" />
+                </svg>
+                <span class="filter-btn__label">Gems range</span>
+                <svg class="icon icon--chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="m4 5.5 3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <div class="filter-menu filter-menu--range" role="dialog" hidden>
+                <h3 class="range-panel__title">Gems range</h3>
+                <div class="range-slider">
+                  <div class="range-slider__track" aria-hidden="true"></div>
+                  <div class="range-slider__fill" aria-hidden="true"></div>
+                  <input type="range" class="range-slider__input range-slider__input--min" min="0" max="400000" step="100" value="0" aria-label="Minimum gems" />
+                  <input type="range" class="range-slider__input range-slider__input--max" min="0" max="400000" step="100" value="400000" aria-label="Maximum gems" />
+                </div>
+                <div class="range-panel__inputs">
+                  <label class="range-input">
+                    <span class="range-input__label">Min</span>
+                    <span class="range-input__field">
+                      <span class="gem gem--sm"></span>
+                      <input type="number" class="range-input__number" data-bound="min" min="0" max="400000" step="100" placeholder="0" />
+                    </span>
+                  </label>
+                  <label class="range-input">
+                    <span class="range-input__label">Max</span>
+                    <span class="range-input__field">
+                      <span class="gem gem--sm"></span>
+                      <input type="number" class="range-input__number" data-bound="max" min="0" max="400000" step="100" placeholder="0" />
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================================
+             TABLE
+             ============================================================ -->
+        <div class="table">
+          <!-- Header -->
+          <div class="table__header" role="row">
+            <div class="cell cell--rank">RANK</div>
+            <div class="cell cell--user">USER</div>
+            <div class="cell cell--league">LEAGUE</div>
+            <div class="cell cell--gems">GEMS</div>
+            <div class="cell cell--change">RANK CHANGE</div>
+          </div>
+
+          <!-- Body wrapper anchors the overlay scrollbar so it stays
+               aligned to the body regardless of where the pinned row sits. -->
+          <div class="table__body-wrap">
+            <div class="table__body" id="table-body">
+              <!-- Rows generated dynamically (500 entries, user at rank 296) -->
+            </div>
+            <!-- Overlay scrollbar — JS-driven -->
+            <div class="table-scrollbar" id="table-scrollbar" aria-hidden="true">
+              <div class="table-scrollbar__thumb" id="table-scrollbar-thumb"></div>
+            </div>
+          </div>
+
+          <!-- Floating back-to-top button — visible only while row 296 is
+               at its natural position in the body (i.e. not stuck). -->
+          <button type="button" class="back-to-top" id="back-to-top" aria-label="Scroll to top">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 12 L8 4 M4 8 L8 4 L12 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <script src="leaderboard.js"></script>
+  </body>
+</html>

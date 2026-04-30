@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings · Varla</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&family=Inter:wght@400;500&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="modal" aria-label="Settings">
+        <!-- ============================================================
+             TAB BAR
+             ============================================================ -->
+        <header class="tabs" role="tablist">
+          <button type="button" class="tab is-active" role="tab" aria-selected="true" data-tab="profile">
+            Profile &amp; Account
+          </button>
+          <button type="button" class="tab" role="tab" aria-selected="false" data-tab="trading">
+            Trading Preferences
+          </button>
+          <button type="button" class="tab" role="tab" aria-selected="false" data-tab="notifications">
+            Notifications
+          </button>
+        </header>
+
+        <!-- ============================================================
+             PANEL — Profile & Account
+             ============================================================ -->
+        <div class="modal__body panel" role="tabpanel" data-panel="profile">
+          <!-- Profile header + form fields share a tighter 32px gap; the
+               outer 56px from .modal__body keeps the Save button breathing. -->
+          <div class="profile-fields">
+            <section class="profile">
+              <!-- Click to upload a new profile picture. Hidden file input is
+                   triggered programmatically so the avatar tile itself can
+                   carry the visual + overlay treatment. -->
+              <button type="button" class="avatar-upload" aria-label="Change profile picture">
+                <img class="profile__avatar" src="assets/avatar.png" alt="Radiant Lyra avatar" />
+                <span class="avatar-upload__overlay" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 17.819 17.819" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.7429 5.57619V0.576191M12.2429 3.07619H17.2429M17.2429 8.90952V13.2429C17.2429 14.643 17.2429 15.3431 16.9704 15.8778C16.7307 16.3482 16.3482 16.7307 15.8778 16.9704C15.3431 17.2429 14.643 17.2429 13.2429 17.2429H4.57619C3.17606 17.2429 2.47599 17.2429 1.94121 16.9704C1.47081 16.7307 1.08836 16.3482 0.848674 15.8778C0.576191 15.3431 0.576191 14.643 0.576191 13.2429V4.57619C0.576191 3.17606 0.576191 2.47599 0.848674 1.94121C1.08836 1.47081 1.47081 1.08836 1.94121 0.848674C2.47599 0.576191 3.17606 0.576191 4.57619 0.576191H8.90952M0.697641 15.5148C1.08859 14.1084 2.37852 13.0762 3.90952 13.0762H9.74286C10.5173 13.0762 10.9045 13.0762 11.2265 13.1402C12.5488 13.4033 13.5825 14.4369 13.8455 15.7592C13.9095 16.0812 13.9095 16.4684 13.9095 17.2429M10.5762 6.82619C10.5762 8.66714 9.08381 10.1595 7.24286 10.1595C5.40191 10.1595 3.90952 8.66714 3.90952 6.82619C3.90952 4.98524 5.40191 3.49286 7.24286 3.49286C9.08381 3.49286 10.5762 4.98524 10.5762 6.82619Z" />
+                  </svg>
+                </span>
+              </button>
+              <input type="file" id="avatar-file" class="avatar-upload__input" accept="image/*" hidden />
+              <div class="profile__info">
+                <div class="profile__row">
+                  <div class="profile__identity">
+                    <h2 class="profile__name">Radiant Lyra</h2>
+                    <button type="button" class="wallet-pill" aria-label="Copy wallet address">
+                      <span class="wallet-pill__addr">0x71C...8F2A</span>
+                      <svg class="wallet-pill__copy" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <rect x="4.5" y="4.5" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.1" />
+                        <path d="M2.5 9V3a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                      </svg>
+                    </button>
+                  </div>
+                  <span class="status-tag">VERIFIED USER</span>
+                </div>
+                <p class="profile__desc">
+                  Profile picture changes reflect across<br />Varla and Leaderboards.
+                </p>
+              </div>
+            </section>
+
+            <!-- Form fields — three stacked input cards -->
+            <div class="form">
+              <label class="field">
+                <span class="field__label">Name</span>
+                <span class="field__input">
+                  <input type="text" value="Radiant Lyra" />
+                </span>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Email Address</span>
+                <span class="field__input">
+                  <input type="email" value="lyra@varla.protocol" />
+                </span>
+              </label>
+
+              <label class="field field--tall">
+                <span class="field__label">Short Description</span>
+                <span class="field__input field__input--multiline">
+                  <textarea rows="3">DeFi enthusiast &amp; prediction market maximalist.</textarea>
+                </span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Save button — full-width white -->
+          <button type="button" class="btn btn--primary save-btn-trigger"><span class="btn__label">Save Changes</span></button>
+        </div>
+
+        <!-- ============================================================
+             PANEL — Notifications
+             ============================================================ -->
+        <div class="modal__body panel notif-panel" role="tabpanel" data-panel="notifications" hidden>
+          <ul class="notif-list">
+            <li class="notif-item">
+              <div class="notif-item__main">
+                <span class="notif-icon" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <rect x="2.5" y="5" width="17" height="12" rx="1.5" stroke="currentColor" stroke-width="1.6" />
+                    <path d="m3 6 8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <div class="notif-text">
+                  <p class="notif-text__title">Email Alerts</p>
+                  <p class="notif-text__desc">Weekly summaries and major product updates.</p>
+                </div>
+              </div>
+              <button type="button" class="toggle" aria-pressed="true" aria-label="Toggle Email Alerts">
+                <span class="toggle__track"></span>
+                <span class="toggle__knob"></span>
+              </button>
+            </li>
+
+            <li class="notif-divider" aria-hidden="true"></li>
+
+            <li class="notif-item">
+              <div class="notif-item__main">
+                <span class="notif-icon" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <circle cx="11" cy="11" r="8.2" stroke="currentColor" stroke-width="1.6" />
+                    <path d="M11 10v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                    <circle cx="11" cy="7.2" r="1" fill="currentColor" />
+                  </svg>
+                </span>
+                <div class="notif-text">
+                  <p class="notif-text__title">Push Notifications</p>
+                  <p class="notif-text__desc">Real-time alerts for order fills and position changes.</p>
+                </div>
+              </div>
+              <button type="button" class="toggle" aria-pressed="true" aria-label="Toggle Push Notifications">
+                <span class="toggle__track"></span>
+                <span class="toggle__knob"></span>
+              </button>
+            </li>
+
+            <li class="notif-divider" aria-hidden="true"></li>
+
+            <li class="notif-item">
+              <div class="notif-item__main">
+                <span class="notif-icon" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <path d="M2.5 11h4l2-5 4 10 2-5h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <div class="notif-text">
+                  <p class="notif-text__title">Liquidation Risk</p>
+                  <p class="notif-text__desc">Critical alerts when your health factor is low.</p>
+                </div>
+              </div>
+              <button type="button" class="toggle" aria-pressed="true" aria-label="Toggle Liquidation Risk">
+                <span class="toggle__track"></span>
+                <span class="toggle__knob"></span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- ============================================================
+             PANEL — Trading Preferences
+             ============================================================ -->
+        <div class="modal__body panel" role="tabpanel" data-panel="trading" hidden>
+          <div class="trading-list">
+            <!-- Expert Mode toggle row -->
+            <div class="notif-item">
+              <div class="notif-item__main">
+                <span class="notif-icon" aria-hidden="true">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <circle cx="11" cy="11" r="8.2" stroke="currentColor" stroke-width="1.6" />
+                    <path d="M11 10v5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                    <circle cx="11" cy="7.2" r="1" fill="currentColor" />
+                  </svg>
+                </span>
+                <div class="notif-text">
+                  <p class="notif-text__title">Expert Mode</p>
+                  <p class="notif-text__desc">Disable safety confirmations and trade with higher limits.</p>
+                </div>
+              </div>
+              <button type="button" class="toggle" id="expert-toggle" aria-pressed="false" aria-label="Toggle Expert Mode">
+                <span class="toggle__track"></span>
+                <span class="toggle__knob"></span>
+              </button>
+            </div>
+
+            <div class="notif-divider" aria-hidden="true"></div>
+
+            <!-- Slippage Tolerance — AUTO/MANUAL with preset + custom input.
+                 data-expert flips presets and the max cap; toggling expert
+                 mode also resets data-mode back to "auto" (handled in JS). -->
+            <section class="slippage" data-mode="auto" data-preset="0.5" data-expert="false">
+              <header class="slippage__header">
+                <h3 class="slippage__title">Slippage Tolerance</h3>
+                <span class="slippage__hint">Max price impact per trade</span>
+              </header>
+
+              <!-- Mode switch: AUTO vs MANUAL -->
+              <div class="seg-group" data-seg-group="mode" role="tablist">
+                <button type="button" class="seg-btn is-active" data-value="auto" role="tab" aria-selected="true">AUTO</button>
+                <button type="button" class="seg-btn" data-value="manual" role="tab" aria-selected="false">MANUAL</button>
+              </div>
+
+              <!-- AUTO mode description -->
+              <p class="slippage__desc">
+                Auto mode sets your slippage tolerance dynamically between 1% and 5%.<br />
+                Slippage tolerance is the maximum price difference allowed between quote and execution before the trade is canceled.
+              </p>
+
+              <!-- Normal-mode preset row -->
+              <div class="seg-group" data-seg-group="preset" data-preset-set="normal" role="tablist">
+                <button type="button" class="seg-btn" data-value="0.1" role="tab" aria-selected="false">0.1%</button>
+                <button type="button" class="seg-btn is-active" data-value="0.5" role="tab" aria-selected="true">0.5%</button>
+                <button type="button" class="seg-btn" data-value="1" role="tab" aria-selected="false">1%</button>
+                <button type="button" class="seg-btn" data-value="custom" role="tab" aria-selected="false">CUSTOM</button>
+              </div>
+
+              <!-- Expert-mode preset row (looser caps) -->
+              <div class="seg-group" data-seg-group="preset" data-preset-set="expert" role="tablist">
+                <button type="button" class="seg-btn is-active" data-value="5" role="tab" aria-selected="true">5%</button>
+                <button type="button" class="seg-btn" data-value="10" role="tab" aria-selected="false">10%</button>
+                <button type="button" class="seg-btn" data-value="15" role="tab" aria-selected="false">15%</button>
+                <button type="button" class="seg-btn" data-value="custom" role="tab" aria-selected="false">CUSTOM</button>
+              </div>
+
+              <!-- Custom slippage input — max & label change with expert mode (JS).
+                   `.has-error` flips field border + reveals the inline error. -->
+              <div class="slip-input">
+                <div class="slip-input__head">
+                  <span class="slip-input__label">Enter slippage</span>
+                  <span class="slip-input__max">MAX: 5%</span>
+                </div>
+                <div class="slip-input__field">
+                  <input type="number" min="0" max="5" step="0.1" placeholder="0.0" />
+                  <span class="slip-input__divider" aria-hidden="true"></span>
+                  <span class="slip-input__suffix">%</span>
+                </div>
+                <p class="slip-input__error">Please enter a custom slippage value before saving</p>
+              </div>
+            </section>
+
+            <div class="notif-divider" aria-hidden="true"></div>
+
+            <!-- Polymarket account row -->
+            <div class="notif-item">
+              <div class="notif-item__main">
+                <span class="notif-icon notif-icon--image" aria-hidden="true">
+                  <img src="assets/polymarket.png" alt="" />
+                </span>
+                <div class="notif-text">
+                  <p class="notif-text__title">Polymarket Account</p>
+                  <p class="notif-text__desc">Sync positions and liquidity history.</p>
+                </div>
+              </div>
+              <button type="button" class="connect-pill is-connected">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.4" />
+                  <path d="m5.5 8 1.8 1.8L10.5 6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span>Connected</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Save button — full-width white -->
+          <button type="button" class="btn btn--primary save-btn-trigger"><span class="btn__label">Save Changes</span></button>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============================================================
+         CONFIRMATION POPUP — opens when Save Changes is clicked
+         ============================================================ -->
+    <div class="popup-overlay" id="confirm-overlay" role="dialog" aria-labelledby="confirm-title" aria-modal="true" hidden>
+      <section class="popup">
+        <header class="popup__head">
+          <h2 id="confirm-title" class="popup__title">Save Changes</h2>
+          <button type="button" class="popup__close" id="confirm-close" aria-label="Close">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </header>
+        <div class="popup__body">
+          <p class="popup__message">
+            Are you sure you want to update your profile information? These changes will be reflected immediately.
+          </p>
+          <div class="popup__actions">
+            <button type="button" class="btn btn--secondary" id="confirm-cancel"><span class="btn__label">Cancel</span></button>
+            <button type="button" class="btn btn--primary" id="confirm-save"><span class="btn__label">Save Changes</span></button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ============================================================
+         SUCCESS POPUP — appears after a confirmed save
+         ============================================================ -->
+    <div class="popup-overlay" id="success-overlay" role="dialog" aria-labelledby="success-title" aria-modal="true" hidden>
+      <section class="popup popup--success">
+        <button type="button" class="popup__close" id="success-close" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div class="success-hero">
+          <div class="success-hero__ring" aria-hidden="true">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <circle class="success-icon__circle" cx="18" cy="18" r="14" transform="rotate(-90 18 18)" stroke="white" stroke-width="2.5" />
+              <path class="success-icon__check" d="M11.5 18.5 L16 23 L24.5 13.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
+          </div>
+          <div class="success-hero__copy">
+            <h2 id="success-title" class="success-hero__title">Profile Updated</h2>
+            <p class="success-hero__desc">
+              Your changes have been saved<br />and reflected across Varla.
+            </p>
+          </div>
+        </div>
+        <button type="button" class="btn btn--primary" id="success-done"><span class="btn__label">Done</span></button>
+      </section>
+    </div>
+
+    <script src="settings.js"></script>
+  </body>
+</html>

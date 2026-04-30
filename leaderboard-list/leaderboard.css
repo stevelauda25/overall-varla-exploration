@@ -1,0 +1,782 @@
+/* =========================================================================
+   Design tokens (shared with deposit modal exploration)
+   ========================================================================= */
+:root {
+  --base-special: #091325;
+  --foreground-primary: #070e1d;
+  --primary-special: #0c1931;
+  --page-bg: #04081a;
+
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.5);
+  --text-tertiary: rgba(255, 255, 255, 0.3);
+
+  --accent-green: #c3e382;
+  --accent-red: #e14747;
+  --brand-blue-300: #7aa9ff;
+
+  --alpha-white-800: rgba(255, 255, 255, 0.1);
+  --alpha-white-900: rgba(255, 255, 255, 0.05);
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  /* Rank stays a fixed pillar; the other four columns fill the remainder */
+  --col-rank: 80px;
+}
+
+/* =========================================================================
+   Reset / base
+   ========================================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--page-bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+input {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  padding: 0;
+}
+
+/* =========================================================================
+   Page wrapper
+   ========================================================================= */
+.page {
+  min-height: 100vh;
+  padding: 24px;
+  display: grid;
+  place-items: start center;
+}
+
+.leaderboard {
+  width: 100%;
+  max-width: 1392px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* =========================================================================
+   Search row
+   ========================================================================= */
+.search-row {
+  position: relative; /* anchor for dropdowns inside */
+  display: flex;
+  align-items: stretch;
+  background: var(--foreground-primary);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: 6px;
+  /* overflow:visible so absolute-positioned dropdowns can extend below */
+  box-shadow: inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
+}
+
+.search-row__input {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-right: 1px solid var(--alpha-white-900);
+}
+
+.search-row__input .icon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.search-row__input input {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.search-row__input input::placeholder {
+  color: var(--text-secondary);
+}
+
+.search-row__filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 16px;
+}
+
+/* Filter pill — used in search row */
+.filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  background: var(--alpha-white-900);
+  border: 0.6px solid var(--alpha-white-800);
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-primary);
+  white-space: nowrap;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.filter-btn .icon {
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.filter-btn .icon--chevron {
+  color: var(--text-secondary);
+}
+
+/* =========================================================================
+   Table
+   ========================================================================= */
+.table {
+  position: relative; /* anchor for .back-to-top */
+  background: var(--foreground-primary);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: 6px;
+  overflow: hidden; /* clips the pinned-row slide-down */
+  display: flex;
+  flex-direction: column;
+  /* Fixed height so the body scrolls inside */
+  height: calc(100vh - 24px - 58px - 12px - 24px);
+  min-height: 480px;
+}
+
+/* Header row */
+.table__header {
+  display: grid;
+  grid-template-columns: var(--col-rank) 1fr 1fr 1fr 1fr;
+  align-items: center;
+  height: 36px;
+  border-bottom: 1px solid var(--alpha-white-900);
+  flex-shrink: 0;
+}
+
+.table__header .cell {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.36px;
+  color: var(--text-secondary);
+  padding: 12px 16px;
+}
+
+/* Body wrapper — holds scrollable list + the overlay scrollbar */
+.table__body-wrap {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.table__body {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.table__body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Overlay scrollbar — sits absolutely over the body's right edge.
+   Stays out of layout flow so column padding stays balanced. */
+.table-scrollbar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 4px;
+  width: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 4;
+}
+.table-scrollbar.is-active {
+  opacity: 1;
+}
+.table-scrollbar__thumb {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 99px;
+}
+
+/* Row */
+.row {
+  display: grid;
+  grid-template-columns: var(--col-rank) 1fr 1fr 1fr 1fr;
+  align-items: center;
+  height: 56px;
+  flex-shrink: 0;
+  border-top: 1px solid var(--alpha-white-900);
+  transition: background 0.15s ease;
+}
+
+.table__body .row:first-child {
+  border-top: 0;
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* The user's own row is sticky on both edges. CSS sticky behaviour:
+     · row's natural position is below viewport → sticks at bottom (top edge)
+     · row's natural position is in viewport    → scrolls naturally
+     · row's natural position is above viewport → sticks at top
+   z-index keeps it above adjacent rows when stuck. */
+.row[data-self="true"] {
+  position: sticky;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.05) 100%
+    ),
+    var(--primary-special);
+}
+
+.row[data-self="true"]:hover {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.05) 100%
+    ),
+    var(--primary-special);
+}
+
+/* JUMP TO MY RANK button is hidden by default — it only appears when the
+   row is currently stuck (set via JS) */
+.row[data-self="true"] .jump-btn {
+  display: none;
+}
+.row[data-self="true"].is-sticky .jump-btn {
+  display: block;
+}
+
+/* Cell — base. min-width:0 allows flex columns to shrink below content size
+   (so long names truncate via ellipsis instead of forcing a horizontal scroll). */
+.cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-right: 1px solid var(--alpha-white-900);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cell:last-child {
+  border-right: 0;
+}
+
+/* Cell — rank: monospace number */
+.cell--rank {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.48px;
+  color: var(--text-primary);
+}
+
+/* Cell — user */
+.cell--user span {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Search-match highlight: white block over the matching substring with
+   inverted text so it reads against the highlight. */
+.cell--user mark {
+  background: #ffffff;
+  color: #00051c;
+  padding: 0;
+  border-radius: 0;
+}
+
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.11);
+}
+
+/* Cell — league */
+.cell--league span:last-child {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+/* League tier shield — variable size via modifier classes */
+.tier {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* Small variant used inside the league dropdown menu */
+.tier--sm {
+  width: 32px;
+  height: 32px;
+}
+
+/* Real badge artwork rendered from Figma. Each PNG is a screenshot of a
+   single tier, including the metallic gradient, chevron decoration, and
+   glow halo. The badges have transparent PNG backgrounds so the soft
+   outer glow renders cleanly over the table row. */
+.tier--bronze   { background-image: url("assets/tier-bronze.png"); }
+.tier--silver   { background-image: url("assets/tier-silver.png"); }
+.tier--gold     { background-image: url("assets/tier-gold.png"); }
+.tier--platinum { background-image: url("assets/tier-platinum.png"); }
+.tier--diamond  { background-image: url("assets/tier-diamond.png"); }
+
+/* Cell — gems */
+.cell--gems .num {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.48px;
+  color: var(--text-primary);
+}
+
+/* Blue gem icon — inline SVG via background-image */
+.gem {
+  width: 13px;
+  height: 22px;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 13 24'><defs><linearGradient id='g' x1='0.5' y1='0' x2='0.5' y2='1'><stop offset='0' stop-color='%2384B6FF'/><stop offset='0.5' stop-color='%234080FF'/><stop offset='1' stop-color='%231C4FB8'/></linearGradient></defs><path d='M2 4 L6.5 0.5 L11 4 L13 8 L6.5 23.5 L0 8 Z' fill='url(%23g)'/><path d='M6.5 0.5 L11 4 L6.5 7 Z' fill='white' fill-opacity='0.35'/><path d='M2 4 L6.5 7 L0 8 Z' fill='black' fill-opacity='0.18'/><path d='M6.5 7 L13 8 L6.5 23.5 Z' fill='black' fill-opacity='0.10'/><path d='M3.6 5.2 L5.2 3.5' stroke='white' stroke-width='0.6' stroke-opacity='0.7' stroke-linecap='round'/></svg>");
+}
+
+/* Smaller gem — used as the prefix icon inside the Gems range Min/Max
+   number fields (where # would otherwise sit). */
+.gem--sm {
+  width: 8px;
+  height: 14px;
+}
+
+/* Cell — rank change */
+.cell--change {
+  position: relative;
+  /* Pinned row's button anchors here */
+}
+
+.change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.48px;
+}
+
+.change--up {
+  color: var(--accent-green);
+}
+
+.change--down {
+  color: var(--accent-red);
+}
+
+.change--none {
+  color: var(--text-secondary);
+}
+
+.change__icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* Up arrow — broken-circle with arrow up. Uses currentColor of the parent. */
+.change--up .change__icon {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23c3e382' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M2.5 8.5 a5.5 5.5 0 0 1 5.5 -5.5'/><path d='M8 3 a5.5 5.5 0 0 1 5.5 5.5'/><path d='M13.5 8 a5.5 5.5 0 0 1 -5.5 5.5'/><path d='M8 13.5 a5.5 5.5 0 0 1 -5.5 -5.5'/><path d='M5.5 7.5 L8 5 L10.5 7.5'/><path d='M8 5 L8 11.5'/></svg>");
+}
+
+.change--down .change__icon {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23e14747' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'><path d='M2.5 8.5 a5.5 5.5 0 0 1 5.5 -5.5'/><path d='M8 3 a5.5 5.5 0 0 1 5.5 5.5'/><path d='M13.5 8 a5.5 5.5 0 0 1 -5.5 5.5'/><path d='M8 13.5 a5.5 5.5 0 0 1 -5.5 -5.5'/><path d='M5.5 8.5 L8 11 L10.5 8.5'/><path d='M8 11 L8 4.5'/></svg>");
+}
+
+/* JUMP TO MY RANK button — anchored to the right edge of the change cell */
+.jump-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 8px;
+  background: var(--alpha-white-900);
+  border: 0.6px solid var(--alpha-white-800);
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-primary);
+  white-space: nowrap;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.jump-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* =========================================================================
+   Floating back-to-top button — appears after the user scrolls past row 1
+   ========================================================================= */
+.back-to-top {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: var(--alpha-white-900);
+  border: 0.6px solid var(--alpha-white-800);
+  border-radius: 50%;
+  color: var(--text-primary);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.1),
+    0 2px 4px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: scale(0.85);
+  pointer-events: none;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    bottom 0.25s ease,
+    background 0.12s ease;
+  z-index: 5;
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* Lift above the bottom-stuck pinned row with a 16px gap.
+   72 = 16 (gap) + 56 (pinned row height) */
+.back-to-top.above-pinned {
+  bottom: 72px;
+}
+
+.back-to-top:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* =========================================================================
+   Filter dropdown (League / All time / Rank range / Gems range)
+   ========================================================================= */
+.filter-dropdown {
+  position: relative;
+}
+
+/* Open state — chevron rotation feedback */
+.filter-dropdown[data-open="true"] .filter-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.filter-dropdown[data-open="true"] .filter-btn .icon--chevron {
+  transform: rotate(180deg);
+}
+.filter-btn .icon--chevron {
+  transition: transform 0.2s ease;
+}
+
+/* The popover panel */
+.filter-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 184px;
+  background: var(--primary-special);
+  border: 1px solid var(--alpha-white-900);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 4px 4px 0 rgba(0, 0, 0, 0.1),
+    inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.filter-menu[hidden] {
+  display: none;
+}
+
+.filter-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.filter-menu__item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Selected item — soft white highlight + visible blue checkmark */
+.filter-menu__item.is-selected {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.filter-menu__label {
+  flex: 1 1 0;
+  padding-left: 2px;
+}
+
+.filter-menu__check {
+  color: var(--brand-blue-300);
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.12s ease;
+}
+
+.filter-menu__item.is-selected .filter-menu__check {
+  opacity: 1;
+}
+
+/* =========================================================================
+   Range filter panel (Rank range / Gems range)
+   ========================================================================= */
+.filter-menu.filter-menu--range {
+  /* Anchor the wider range popovers to the right edge of their toggle
+     so they extend leftward instead of overflowing the table width.
+     `!important` defeats both cascade order and any cached version of
+     the base `.filter-menu { left: 0 }` rule. */
+  left: auto !important;
+  right: 0 !important;
+  width: 316px;
+  padding: 12px;
+  gap: 16px;
+}
+
+.range-panel__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+/* Dual-handle slider — two stacked range inputs over a single track,
+   with a fill div between the two thumbs. */
+.range-slider {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  margin: 4px 0; /* breathing room so thumbs aren't clipped */
+}
+
+.range-slider__track {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 99px;
+}
+
+.range-slider__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #8cb7ed;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* Both range inputs cover the full track. pointer-events:none lets clicks
+   pass through everywhere except the thumbs (which have pointer-events:auto). */
+.range-slider__input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+  outline: none;
+  z-index: 2;
+}
+
+.range-slider__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  background: #8cb7ed;
+  box-sizing: border-box;
+  cursor: grab;
+}
+
+.range-slider__input::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+.range-slider__input::-moz-range-thumb {
+  pointer-events: auto;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  background: #8cb7ed;
+  box-sizing: border-box;
+  cursor: grab;
+}
+
+.range-slider__input::-moz-range-track {
+  background: transparent;
+  border: 0;
+}
+
+/* Min / Max number inputs */
+.range-panel__inputs {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.range-input {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.range-input__label {
+  padding: 0 12px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.range-input__field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 42px;
+  padding: 0 12px;
+  background: #061022;
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 0 2px 1.5px rgba(0, 0, 0, 0.08);
+}
+
+.range-input__prefix {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.range-input__number {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.56px;
+  color: var(--text-primary);
+  background: transparent;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.range-input__number::placeholder {
+  color: var(--text-secondary);
+}
+
+.range-input__number::-webkit-outer-spin-button,
+.range-input__number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

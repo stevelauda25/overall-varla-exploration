@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Varla — Explorations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="hub.css" />
+  </head>
+  <body>
+    <main class="hub">
+      <header class="hub__header">
+        <p class="hub__eyebrow">Varla</p>
+        <h1 class="hub__title">Vibe-coded explorations</h1>
+        <p class="hub__subtitle">
+          A small gallery of UI prototypes built while learning the codebase.
+          Each card opens a self-contained prototype.
+        </p>
+      </header>
+
+      <ul class="hub__grid">
+        <li>
+          <a class="card" href="market-list/">
+            <span class="card__index">01</span>
+            <span class="card__name">Market list</span>
+            <span class="card__desc">
+              Browseable grid of markets with filters and sort.
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="deposit-modal/">
+            <span class="card__index">02</span>
+            <span class="card__name">Bulk deposit modal</span>
+            <span class="card__desc">
+              Multi-position deposit flow with running totals.
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="settings-modal/">
+            <span class="card__index">03</span>
+            <span class="card__name">Settings modal</span>
+            <span class="card__desc">
+              Account preferences with toggles and tier states.
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="leverage-position/">
+            <span class="card__index">04</span>
+            <span class="card__name">Leverage panel</span>
+            <span class="card__desc">
+              Position sizing with leverage slider and risk preview.
+            </span>
+          </a>
+        </li>
+        <li>
+          <a class="card" href="leaderboard-list/">
+            <span class="card__index">05</span>
+            <span class="card__name">Leaderboard table</span>
+            <span class="card__desc">
+              Ranked traders with tier icons and score bars.
+            </span>
+          </a>
+        </li>
+      </ul>
+
+      <footer class="hub__footer">
+        <span>Static prototypes · no backend</span>
+      </footer>
+    </main>
+  </body>
+</html>

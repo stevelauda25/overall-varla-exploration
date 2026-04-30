@@ -1,0 +1,1323 @@
+/* =========================================================================
+   Design tokens (shared across Varla explorations)
+   ========================================================================= */
+:root {
+  --base-special: #091325;
+  --foreground-primary: #070e1d;
+  --primary-special: #0c1931;
+  --page-bg: #04081a;
+
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.5);
+  --text-tertiary: rgba(255, 255, 255, 0.3);
+
+  --accent-green-lime: #c3e382;
+  --accent-red: #e14747;
+  --brand-blue-300: #7aa9ff;
+
+  --alpha-white-800: rgba(255, 255, 255, 0.1);
+  --alpha-white-900: rgba(255, 255, 255, 0.05);
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  /* Card geometry from Figma */
+  --card-radius: 4px;
+  --card-padding: 16px;
+  --card-gap-block: 16px;
+  --card-gap-row: 10px;
+}
+
+/* =========================================================================
+   Reset / base
+   ========================================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Reserve the scrollbar gutter at all times so the page width stays
+   constant whether or not vertical scrollbar is present (e.g. when filtering
+   leaves only a few cards). Prevents the toolbar/grid from shifting. */
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--page-bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================================================================
+   Page layout — full-bleed container with 24px padding on every side.
+   ========================================================================= */
+.page {
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.markets {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Hairline between the toolbar and the market grid. The 12px gaps from
+   `.markets` and `.markets__top` apply above and below it automatically. */
+.markets__divider {
+  width: 100%;
+  height: 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--alpha-white-900);
+}
+
+/* Sticky group — keeps the toolbar + divider pinned at the top of the
+   viewport so only the market grid scrolls. The matching page-bg fill
+   prevents cards from showing through as they scroll under. */
+.markets__top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--page-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* Pull the bg up into the 24px page padding so the strip above the
+     toolbar is also covered when scrolled. */
+  margin-top: -24px;
+  padding-top: 24px;
+}
+
+/* =========================================================================
+   Toolbar — search row + segmented controls + filter chips.
+   Mirrors Figma node 16152:203108. Stacked block of 12px gap between rows.
+   ========================================================================= */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toolbar__top {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .toolbar__top {
+    flex-direction: column;
+  }
+}
+
+/* ---- Search row ---- */
+.search-row {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  height: 58px;
+  background: var(--foreground-primary);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: 6px;
+  box-shadow: inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
+  /* No overflow:hidden — would clip the sort dropdown's popover. The
+     rounded corners still clip via `border-radius`, and the input's
+     autofill background is suppressed via the `:-webkit-autofill` rules
+     below. */
+}
+
+.search-row__input {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-right: 1px solid var(--alpha-white-900);
+}
+
+.search-row__input .icon {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.search-row__input input {
+  flex: 1 1 0;
+  min-width: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.search-row__input input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Kill the yellow/white autofill background Chrome paints on top of inputs */
+.search-row__input input:-webkit-autofill,
+.search-row__input input:-webkit-autofill:hover,
+.search-row__input input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--foreground-primary) inset;
+  -webkit-text-fill-color: var(--text-primary);
+  caret-color: var(--text-primary);
+  transition: background-color 9999s ease-out 0s;
+}
+
+.search-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+/* Refresh + Newest sit tighter together (6px) than the wallet-toggle group. */
+.action-chip-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---- Action chips (Refresh, Newest) ---- */
+.action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px 6px 6px;
+  background: var(--alpha-white-900);
+  border: 0.6px solid var(--alpha-white-800);
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.action-chip .icon {
+  color: var(--text-primary);
+}
+
+.action-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* When refresh is in flight we just disable the chip — the actual loading
+   feedback is the overlay over the grid (see `.loading-overlay`). */
+.action-chip[data-refresh].is-loading {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* =========================================================================
+   Sort dropdown — same UX pattern as leaderboard-list's "All time" filter.
+   The trigger reuses `.action-chip` styling; only the popover and items
+   need new rules.
+   ========================================================================= */
+.filter-dropdown {
+  position: relative;
+  display: inline-flex;
+}
+
+.filter-dropdown[data-open="true"] .action-chip {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.filter-dropdown[data-open="true"] .icon--chevron {
+  transform: rotate(180deg);
+}
+
+.action-chip .icon--chevron {
+  transition: transform 0.2s ease;
+}
+
+.filter-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 184px;
+  background: var(--primary-special);
+  border: 1px solid var(--alpha-white-900);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 4px 4px 0 rgba(0, 0, 0, 0.1),
+    inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
+  z-index: 20;
+}
+
+.filter-menu[hidden] {
+  display: none;
+}
+
+.filter-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 10px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.filter-menu__item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.filter-menu__item.is-selected {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.filter-menu__label {
+  flex: 1 1 0;
+  padding-left: 2px;
+}
+
+.filter-menu__check {
+  color: var(--brand-blue-300);
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.12s ease;
+}
+
+.filter-menu__item.is-selected .filter-menu__check {
+  opacity: 1;
+}
+
+/* Hide the supported-only "Ending soonest" option when the not-supported
+   tab is active — the JS adds `data-tab="not-supported"` on <body>. */
+body[data-tab="not-supported"] .filter-menu__item[data-supported-only] {
+  display: none;
+}
+
+/* =========================================================================
+   Loading overlay — dims the grid while the refresh "processes". Stays
+   below the sticky toolbar (z-index 10) so the toolbar remains usable.
+   12-spoke spinner ticks via `loading-tick` (1 step per spoke).
+   ========================================================================= */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  background: rgba(7, 14, 29, 0.5);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.loading-overlay.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.loading-spinner {
+  animation: loading-tick 1s steps(12) infinite;
+  transform-origin: center;
+}
+
+@keyframes loading-tick {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- Wallet toggle group ---- */
+.wallet-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wallet-toggle__label {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.icon-btn:hover {
+  color: var(--text-primary);
+}
+
+/* Wrapper for help-icon button only — used as the anchor for the tooltip
+   bounding rect calculation. Rendering itself is unaffected. */
+.help-popover {
+  position: relative;
+  display: inline-flex;
+}
+
+/* =========================================================================
+   Wallet tooltip — Figma node 16159:203142.
+   Positioned via JS (see market.js) using `position: fixed`, escaping the
+   clipped, sticky toolbar container.
+   ========================================================================= */
+.tooltip {
+  position: fixed;
+  z-index: 100;
+  width: 254px;
+  padding: 10px;
+  background: var(--primary-special);
+  border: 1px solid var(--alpha-white-900);
+  border-radius: 6px;
+  box-shadow:
+    0 4px 4px 0 rgba(0, 0, 0, 0.1),
+    inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: var(--font-sans);
+}
+
+.tooltip[hidden] {
+  display: none;
+}
+
+/* Inner stack — Figma's "Left Container" with 12px gap between INFO row
+   and the In Wallet body. The outer 20px gap separates this from the
+   actions row below. */
+.tooltip__main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tooltip__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tooltip__kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.2;
+  color: #ffffff;
+}
+
+.tooltip__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+}
+
+.tooltip__close:hover {
+  color: var(--text-primary);
+}
+
+.tooltip__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tooltip__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.tooltip__text {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+
+.tooltip__actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+/* Tooltip buttons — the primary "Got it" is white with subtle gradient,
+   the secondary "Skip" is the standard outlined chip. */
+.tt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  padding: 6px 8px;
+  border-radius: 2px;
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: nowrap;
+  border: 0;
+}
+
+.tt-btn--primary {
+  background: linear-gradient(180deg, #ffffff 0%, #e9e9e9 100%);
+  color: #00051c;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    0 2px 2px 0 rgba(0, 0, 0, 0.25),
+    inset 0 2px 4px 0 #ffffff,
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.tt-btn--secondary {
+  background: var(--alpha-white-900);
+  border: 0.6px solid var(--alpha-white-800);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.tt-btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ---- Toggle switch — matches the Deposit Modal toggle exactly:
+     33×21 track, 17×17 white knob, off=neutral / on=lime gradient. */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 33px;
+  height: 21px;
+  flex: 0 0 33px;
+  border-radius: 999px;
+}
+
+.switch input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  margin: 0;
+}
+
+.switch__track {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.switch__knob {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #ffffff;
+  transform: translateY(-50%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.15);
+  transition: left 0.18s ease;
+}
+
+.switch input:checked ~ .switch__track {
+  background: linear-gradient(180deg, #d9ed9c 0%, #a9c95f 100%);
+  border-color: rgba(195, 227, 130, 0.5);
+}
+
+.switch input:checked ~ .switch__track .switch__knob {
+  left: 14px;
+}
+
+/* ---- Segmented controls ---- */
+.segments {
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  width: 408px;
+  height: 58px;
+  padding: 9px;
+  background: var(--foreground-primary);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: 6px;
+  box-shadow: inset 0 0 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 900px) {
+  .segments {
+    width: 100%;
+  }
+}
+
+.segment {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 2px;
+  border: 0.6px solid transparent;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.segment.is-active {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--alpha-white-800);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.segment:not(.is-active):hover {
+  color: var(--text-primary);
+}
+
+/* ---- Category filter chips — visual language matches leaderboard-list
+     filter pills (0.6px border, 1px ambient shadow) but sized as full-row
+     chips that flex-fill the toolbar width. */
+.filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter {
+  flex: 1 1 0;
+  min-width: 90px;
+  padding: 10px 16px;
+  border: 0.6px solid var(--alpha-white-800);
+  border-radius: 3px;
+  background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05))
+    var(--foreground-primary);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.1;
+  white-space: nowrap;
+  text-align: center;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.filter:hover {
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: linear-gradient(rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.08))
+    var(--foreground-primary);
+}
+
+.filter.is-active {
+  color: #4f91e1;
+  background: linear-gradient(rgba(40, 115, 207, 0.2), rgba(40, 115, 207, 0.2))
+    var(--foreground-primary);
+}
+
+/* =========================================================================
+   Grid of cards
+   The card width in Figma is 456px; the grid uses auto-fill so cards stay
+   close to that target on wide screens and reflow to one column on mobile.
+   ========================================================================= */
+.market-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+}
+
+/* `display: grid` above wins over the UA `[hidden] { display: none }` rule
+   without this explicit override — needed so the segment switch can hide
+   the inactive grid. */
+.market-grid[hidden] {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .market-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================================================
+   Market card
+   Mirrors Figma node 16145:203087 — outer container, head row (thumb +
+   meta + title), and body (odds bar + footer with time/progress).
+   ========================================================================= */
+.market-card {
+  background: var(--foreground-primary);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: var(--card-radius);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.market-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.market-card__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap-block);
+  padding: var(--card-padding);
+  width: 100%;
+}
+
+/* ----- HEAD: thumbnail + meta + title ----- */
+.market-card__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--card-gap-row);
+}
+
+.market-card__thumb {
+  width: 41px;
+  height: 41px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.market-card__meta-wrap {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.market-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.market-card__source {
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.market-card__delta {
+  color: var(--brand-blue-300);
+  white-space: nowrap;
+}
+
+/* Negative delta tint — applied via `.is-negative` from the template loop */
+.market-card__delta.is-negative {
+  color: var(--accent-red);
+}
+
+/* Title sits next to the optional `.wallet-chip` — title flexes, chip stays
+   pinned to the right at its natural width. */
+.market-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.market-card__title {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tag shown on cards that are "in the user's wallet" — Figma 16161:203201. */
+.wallet-chip {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  background: var(--alpha-white-900);
+  border: 0.5px solid var(--alpha-white-800);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Search-match highlight — inverted text on white block, same pattern as
+   the leaderboard-list. Applied via <mark> wrappers from market.js. */
+.market-card__title mark,
+.market-card__source mark {
+  background: #ffffff;
+  color: #00051c;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* ----- BODY: odds bar + footer ----- */
+.market-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap-block);
+}
+
+/* =========================================================================
+   Odds bar — split YES/NO with proportional width.
+   The YES side width is set inline via --yes-pct (defaults to 50%).
+   ========================================================================= */
+.odds-bar {
+  display: flex;
+  align-items: stretch;
+  border: 0.8px solid var(--alpha-white-900);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.odds-bar__side {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.odds-bar__side--yes {
+  background: rgba(195, 227, 130, 0.2);
+  color: var(--accent-green-lime);
+  width: var(--yes-pct, 50%);
+  justify-content: flex-start;
+}
+
+.odds-bar__side--no {
+  background: rgba(225, 71, 71, 0.05);
+  color: var(--accent-red);
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+/* When NO is leading (yes < 50%), invert emphasis: green tint fades to 5%
+   and the red side fills to full opacity. Text color flips to white on the
+   solid red so the label stays readable. */
+.odds-bar.is-no-leading .odds-bar__side--yes {
+  background: rgba(195, 227, 130, 0.05);
+}
+
+.odds-bar.is-no-leading .odds-bar__side--no {
+  background: rgba(225, 71, 71, 0.2);
+}
+
+/* =========================================================================
+   Footer — time-left text + progress bar
+   ========================================================================= */
+.market-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.market-card__time {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Progress bar — track + filled portion. Fill width via --progress-pct. */
+.progress {
+  position: relative;
+  flex-shrink: 0;
+  width: 178px;
+  height: 6px;
+  border-radius: 4px;
+  background: rgba(122, 169, 255, 0.1);
+  overflow: hidden;
+}
+
+.progress__fill {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: var(--progress-pct, 60%);
+  border-radius: 4px;
+  border: 0.5px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(
+    90deg,
+    rgba(122, 169, 255, 0.55) 0%,
+    rgba(122, 169, 255, 0.95) 60%,
+    rgba(170, 200, 255, 1) 100%
+  );
+  box-shadow: inset 0 0 6px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Subtle radial sheen layered over the fill — mimics the Figma score bar. */
+.progress__fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(7, 14, 29, 0.1) 0%,
+    rgba(7, 14, 29, 0) 70%
+  );
+  pointer-events: none;
+}
+
+/* =========================================================================
+   Responsive tweaks
+   ========================================================================= */
+@media (max-width: 520px) {
+  .progress {
+    width: 120px;
+  }
+}
+
+/* =========================================================================
+   NOT SUPPORTED BY VARLA — multi-event + single-event cards
+   Two card variants share the head/foot scaffolding. The body diverges:
+   multi-event renders a (potentially scrollable) option list; single-event
+   renders a chance arc and a pair of full-width YES/NO buttons.
+   ========================================================================= */
+
+/* ---- Shared bits across both not-supported variants ----
+   Values mirror the Figma multi-event component (16164:203214):
+   padding-xl=16, spacing-1xl=14, spacing-lg=10, spacing-m=8,
+   spacing-xs=4, padding-s=8, padding-2xs=4. */
+.market-card--multi .market-card__inner,
+.market-card--single .market-card__inner {
+  gap: 14px;
+  padding: 16px;
+}
+
+.market-card--multi .market-card__head,
+.market-card--single .market-card__head {
+  gap: 10px;
+  align-items: center;
+}
+
+/* Title — Inter Medium 16px, leading-1.2, white, single-line ellipsis.
+   Matches Figma 16164:203219. Single-event uses its own rule (further
+   below) since its title spec hasn't been pulled yet. */
+.market-card--multi .market-card__title {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Footer row — volume on the left, icon group on the right. */
+.market-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.market-card__volume {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.market-card__icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
+}
+
+.card-icon-btn:hover {
+  color: var(--text-primary);
+}
+
+.card-icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* =========================================================================
+   Multi-event card — option list
+   Each option is a row: (name + percentage) | YES button + NO button.
+   The user's spec is to scroll the list when more than 2 options exist;
+   max-height is set so exactly two rows fit without scrolling.
+   ========================================================================= */
+/* Wrapper acts as the positioning context for the absolute scroll thumb.
+   It is intentionally not the scroll container — that's the inner ul,
+   so the thumb stays put while content scrolls underneath it. */
+.option-list-wrap {
+  position: relative;
+  max-height: 56px;
+}
+
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* spacing-m */
+  /* Two rows of ~22.6px (button-height-driven) + 8px gap = ~54px. Round to
+     56px so 2 options fit cleanly; 3+ options scroll within the card. */
+  max-height: 56px;
+  overflow-y: auto;
+  /* Hide native scrollbar entirely — the absolute thumb below replaces it
+     and overlays content instead of reserving a gutter. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.option-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom scroll thumb — overlays content via position: absolute. JS sets
+   its height and translateY based on scroll progress (see market.js).
+   Hidden by default; revealed via the `is-visible` class while scrolling
+   and on hover of the wrapper. */
+.option-list__thumb {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.25);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  /* Hidden when the list doesn't actually scroll (set by JS). */
+}
+
+.option-list__thumb[hidden] {
+  display: none;
+}
+
+.option-list-wrap:hover .option-list__thumb,
+.option-list__thumb.is-visible {
+  opacity: 1;
+}
+
+/* Keep flex children from being shrunk by the max-height constraint —
+   without this, flex-direction: column would compress rows to fit. */
+.option-row {
+  flex-shrink: 0;
+}
+
+/* Row layout per Figma 16164:203222 — name+% pair on the left in a
+   space-between row, fixed 80px-wide buttons block on the right. */
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* spacing-m */
+}
+
+.option-row__main {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.option-row__name {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.option-row__pct {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.option-row__buttons {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px; /* spacing-xs */
+  width: 80px;
+  flex-shrink: 0;
+}
+
+/* YES / NO buttons — Figma 16164:203227. Geist Mono 10px, 0.4px tracking,
+   0.8px alpha-white-900 border, 2px radius, 4×8 padding, color tokens. */
+.opt-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 2px;
+  border: 0.8px solid var(--alpha-white-900);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.opt-btn--yes {
+  background: rgba(195, 227, 130, 0.2);
+  color: var(--accent-green-lime);
+}
+
+.opt-btn--no {
+  background: rgba(225, 71, 71, 0.2);
+  color: var(--accent-red);
+}
+
+/* =========================================================================
+   Single-event card — Figma 16164:203247.
+   Tokens used: spacing-6xl=32, spacing-4xl=24, spacing-lg=10, spacing-xl=12,
+   spacing-m=8, padding-xl=16, padding-s=8, alpha-white-900, green-lime,
+   red-rose. Chance arc is a 60×41 frame with a 180° SVG arc behind a
+   bottom-anchored value stack.
+   ========================================================================= */
+
+/* Override the shared multi+single inner gap (14px) — single uses 32px. */
+.market-card--single .market-card__inner {
+  gap: 32px;
+}
+
+/* Header: head-left flexes, chance-arc holds its 60px width. Items align
+   to top because the arc box is 41px and head-left is 41px (thumb height)
+   so flex-start keeps them flush. */
+.market-card--single .market-card__head {
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.market-card--single .market-card__head-left {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.market-card--single .market-card__title {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Figma 16164:203251 — `overflow-hidden text-ellipsis` with no
+     whitespace-nowrap. Override the supported card's nowrap default so
+     long titles wrap (the Bitcoin example flows onto two lines in Figma). */
+  white-space: normal;
+}
+
+/* Bottom section — wraps the YES/NO row and the footer; gap 12px between
+   them per Figma's `spacing-xl` token. */
+.market-card--single .market-card__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.market-card--single .market-card__big-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Big YES / NO — Figma 16164:203260 / :203262. Geist Mono Regular 14px,
+   tracking 0.56px (= 0.04em), 0.8px alpha-white-900 border, 2px radius,
+   8/16 padding (vertical/horizontal), tinted backgrounds. */
+.big-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 2px;
+  border: 0.8px solid var(--alpha-white-900);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.56px;
+  white-space: nowrap;
+}
+
+.big-btn--yes {
+  background: rgba(195, 227, 130, 0.2);
+  color: var(--accent-green-lime);
+}
+
+.big-btn--no {
+  background: rgba(225, 71, 71, 0.2);
+  color: var(--accent-red);
+}
+
+/* ---- Chance arc — Figma 16164:203252.
+   60×41 box. Arc SVG fills the box; the value stack is absolutely
+   positioned, bottom-anchored, 32px wide, horizontally centred. */
+.chance-arc {
+  position: relative;
+  flex-shrink: 0;
+  width: 60px;
+  height: 41px;
+}
+
+.chance-arc__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.chance-arc__value {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.chance-arc__pct {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.52px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.chance-arc__caption {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--text-secondary);
+  text-align: center;
+  width: 100%;
+}

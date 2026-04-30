@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Markets · Varla</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="market.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="markets" aria-label="Markets">
+        <!-- Sticky-top group: toolbar + hairline divider stay pinned while
+             only the market grid scrolls beneath. -->
+        <div class="markets__top">
+        <!-- ============================================================
+             TOOLBAR — search row + segmented controls + filter chips
+             Mirrors Figma node 16152:203108
+             ============================================================ -->
+        <header class="toolbar">
+          <div class="toolbar__top">
+            <!-- Search + right-side actions -->
+            <div class="search-row">
+              <label class="search-row__input">
+                <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.6" />
+                  <path d="m17 17-3.5-3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
+                <input type="text" placeholder="Search markets" />
+              </label>
+              <div class="search-row__actions">
+                <div class="action-chip-group">
+                  <!-- Sort dropdown — same dropdown UX as leaderboard-list's
+                       "All time" filter (filter-dropdown + filter-menu).
+                       Default selection is "Newest". -->
+                  <div class="filter-dropdown" data-filter="sort">
+                    <button type="button" class="action-chip" data-dropdown-toggle aria-haspopup="listbox" aria-expanded="false">
+                      <svg class="icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.3" />
+                        <path d="M7 4.3V7l1.7 1.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                      </svg>
+                      <span class="filter-btn__label">Newest</span>
+                      <svg class="icon icon--chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                        <path d="m4 5.5 3 3 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </button>
+                    <div class="filter-menu" role="listbox" hidden>
+                      <button type="button" class="filter-menu__item is-selected" data-value="newest" role="option">
+                        <span class="filter-menu__label">Newest</span>
+                        <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </button>
+                      <button type="button" class="filter-menu__item" data-value="oldest" role="option">
+                        <span class="filter-menu__label">Oldest</span>
+                        <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </button>
+                      <button type="button" class="filter-menu__item" data-value="volume" role="option">
+                        <span class="filter-menu__label">Highest volume</span>
+                        <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </button>
+                      <button type="button" class="filter-menu__item" data-value="ending-soon" role="option" data-supported-only>
+                        <span class="filter-menu__label">Ending soonest</span>
+                        <svg class="filter-menu__check" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                          <path d="m3.5 8 3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <button type="button" class="action-chip" data-refresh>
+                    <svg class="icon icon--refresh" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <path d="M11.5 2.5v3h-3M2.5 11.5v-3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="M11 5.5A4.5 4.5 0 0 0 3.7 4.2M3 8.5a4.5 4.5 0 0 0 7.3 1.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                    </svg>
+                    <span>Refresh</span>
+                  </button>
+                </div>
+                <div class="wallet-toggle">
+                  <span class="wallet-toggle__label">In wallet</span>
+                  <label class="switch">
+                    <input type="checkbox" />
+                    <span class="switch__track" aria-hidden="true">
+                      <span class="switch__knob"></span>
+                    </span>
+                  </label>
+                  <div class="help-popover">
+                    <button type="button" class="icon-btn" aria-label="Info" data-tooltip-trigger>
+                      <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.4" />
+                        <path d="M7.8 7.6a2.2 2.2 0 1 1 3 2.1c-.6.3-.8.7-.8 1.3v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                        <circle cx="10" cy="14" r=".75" fill="currentColor" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Segmented controls: Supported / Not Supported -->
+            <div class="segments" role="tablist">
+              <button type="button" class="segment is-active" role="tab" aria-selected="true" data-segment="supported">
+                Supported by Varla
+              </button>
+              <button type="button" class="segment" role="tab" aria-selected="false" data-segment="not-supported">
+                Not Supported by Varla
+              </button>
+            </div>
+          </div>
+
+          <!-- Category filter chips -->
+          <nav class="filters" aria-label="Categories">
+            <button type="button" class="filter is-active" data-filter="all">All</button>
+            <button type="button" class="filter" data-filter="economy">Economy</button>
+            <button type="button" class="filter" data-filter="politics">Politics</button>
+            <button type="button" class="filter" data-filter="crypto">Crypto</button>
+            <button type="button" class="filter" data-filter="geopolitics">Geopolitics</button>
+            <button type="button" class="filter" data-filter="tech">Tech</button>
+            <button type="button" class="filter" data-filter="culture">Culture</button>
+            <button type="button" class="filter" data-filter="sport">Sport</button>
+          </nav>
+        </header>
+
+          <hr class="markets__divider" />
+        </div>
+
+        <!-- Two grids — only the one matching the active segment is shown.
+             Filters (search, category, wallet) apply to whichever grid is
+             active, so the user sees a consistent toolbar across tabs. -->
+        <ul class="market-grid" id="market-grid" data-grid="supported">
+          <!-- Supported cards rendered by market.js -->
+        </ul>
+        <ul class="market-grid market-grid--unsupported" id="market-grid-unsupported" data-grid="not-supported" hidden>
+          <!-- Not-supported cards rendered by market.js -->
+        </ul>
+      </section>
+    </main>
+
+    <!-- =====================================================================
+         LOADING OVERLAY — fixed full-viewport dim + 12-spoke spinner.
+         Sits at z-index 9 so the sticky toolbar (z-index 10) stays on top
+         and remains interactive while the grid area is dimmed.
+         ===================================================================== -->
+    <div class="loading-overlay" id="grid-loading" aria-hidden="true">
+      <svg class="loading-spinner" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Loading">
+        <g stroke="white" stroke-width="2" stroke-linecap="round">
+          <line x1="16" y1="3" x2="16" y2="9" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.92" transform="rotate(30 16 16)" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.85" transform="rotate(60 16 16)" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.77" transform="rotate(90 16 16)" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.69" transform="rotate(120 16 16)" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.62" transform="rotate(150 16 16)" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.54" transform="rotate(180 16 16)" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.46" transform="rotate(210 16 16)" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.38" transform="rotate(240 16 16)" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.31" transform="rotate(270 16 16)" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.23" transform="rotate(300 16 16)" />
+          <line x1="16" y1="3" x2="16" y2="9" opacity="0.15" transform="rotate(330 16 16)" />
+        </g>
+      </svg>
+    </div>
+
+    <!-- =====================================================================
+         WALLET TOOLTIP — anchored to the help icon, mirrors Figma 16159:203142.
+         Positioned via JS using the trigger's bounding rect (escapes the
+         clipped, sticky toolbar container).
+         ===================================================================== -->
+    <div class="tooltip" id="wallet-tooltip" role="dialog" aria-labelledby="wallet-tooltip-title" hidden>
+      <div class="tooltip__main">
+        <div class="tooltip__head">
+          <span class="tooltip__kicker">INFO</span>
+          <button type="button" class="tooltip__close" aria-label="Close" data-tooltip-close>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <div class="tooltip__body">
+          <h3 class="tooltip__title" id="wallet-tooltip-title">In Wallet</h3>
+          <p class="tooltip__text">
+            You can leverage your existing positions and also buy new leveraged ones. Turn this on to see positions in your wallet available for leverage
+          </p>
+        </div>
+      </div>
+      <div class="tooltip__actions">
+        <button type="button" class="tt-btn tt-btn--primary" data-tooltip-close>Got it</button>
+        <button type="button" class="tt-btn tt-btn--secondary" data-tooltip-close>Skip</button>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         CARD TEMPLATE
+         Cloned per item from market.js to keep markup DRY.
+         ===================================================================== -->
+    <template id="market-card-template">
+      <li class="market-card" data-side="yes">
+        <button type="button" class="market-card__inner" aria-label="Open market">
+          <!-- TOP ROW: thumbnail + meta + title.
+               The thumb-host is replaced by market.js with either an <img>
+               (for cards that have a real photo) or a styled <span> with a
+               category gradient + emoji. -->
+          <div class="market-card__head">
+            <span class="market-card__thumb-host"></span>
+            <div class="market-card__meta-wrap">
+              <div class="market-card__meta">
+                <span class="market-card__source"></span>
+                <span class="market-card__delta"></span>
+              </div>
+              <div class="market-card__title-row">
+                <p class="market-card__title"></p>
+                <span class="wallet-chip" hidden>In wallet</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM SECTION: YES/NO bar + footer -->
+          <div class="market-card__body">
+            <div class="odds-bar">
+              <span class="odds-bar__side odds-bar__side--yes">
+                <span class="odds-bar__label"></span>
+              </span>
+              <span class="odds-bar__side odds-bar__side--no">
+                <span class="odds-bar__label"></span>
+              </span>
+            </div>
+
+            <div class="market-card__footer">
+              <span class="market-card__time"></span>
+              <span class="progress" role="img" aria-label="Time progress">
+                <span class="progress__fill"></span>
+              </span>
+            </div>
+          </div>
+        </button>
+      </li>
+    </template>
+
+    <!-- =====================================================================
+         MULTI-EVENT CARD TEMPLATE (Not Supported by Varla)
+         A market with N candidate options. Each option exposes its own
+         YES / NO trade buttons. When the option list overflows ~2 rows the
+         inner container scrolls. Mirrors Figma node 16164:203214.
+         ===================================================================== -->
+    <template id="market-card-multi-template">
+      <!-- The wrapper is a <div>, not a <button>, because the card body
+           contains real <button>s (YES/NO trade actions, boost, bookmark)
+           and nesting buttons inside a button is invalid HTML — browsers
+           silently close the outer button at the first inner one, which
+           would break layout. -->
+      <li class="market-card market-card--multi">
+        <div class="market-card__inner" role="button" tabindex="0" aria-label="Open market">
+          <div class="market-card__head">
+            <span class="market-card__thumb-host"></span>
+            <p class="market-card__title"></p>
+          </div>
+
+          <!-- Option rows; rendered by market.js. The wrapper hosts the
+               absolute-positioned scroll thumb so it overlays content
+               instead of taking up a gutter. -->
+          <div class="option-list-wrap">
+            <ul class="option-list" data-option-list></ul>
+            <span class="option-list__thumb" data-option-thumb></span>
+          </div>
+
+          <div class="market-card__foot">
+            <span class="market-card__volume"></span>
+            <span class="market-card__icons">
+              <button type="button" class="card-icon-btn" aria-label="Boost">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <rect x="2" y="6.5" width="12" height="3" rx="0.6" stroke="currentColor" stroke-width="1.2" />
+                  <rect x="3.5" y="9.5" width="9" height="4" rx="0.6" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M8 6.5v7" stroke="currentColor" stroke-width="1.2" />
+                  <path d="M5.5 6.5c-1 0-1.6-.8-1.2-1.6.4-.9 2-1.4 3.7.6.3.3.6.7.6.7s-1.7.3-3.1.3Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                  <path d="M10.5 6.5c1 0 1.6-.8 1.2-1.6-.4-.9-2-1.4-3.7.6-.3.3-.6.7-.6.7s1.7.3 3.1.3Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <button type="button" class="card-icon-btn" aria-label="Bookmark">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 2.5h8v11l-4-2.5L4 13.5v-11Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </span>
+          </div>
+        </div>
+      </li>
+    </template>
+
+    <!-- Per-option row inside a multi-event card. Mirrors Figma node
+         16164:203222 — name + percentage live in a `__main` container that
+         uses justify-between, with a fixed-width buttons block on the right. -->
+    <template id="market-option-template">
+      <li class="option-row">
+        <span class="option-row__main">
+          <span class="option-row__name"></span>
+          <span class="option-row__pct"></span>
+        </span>
+        <span class="option-row__buttons">
+          <button type="button" class="opt-btn opt-btn--yes">YES</button>
+          <button type="button" class="opt-btn opt-btn--no">NO</button>
+        </span>
+      </li>
+    </template>
+
+    <!-- =====================================================================
+         SINGLE-EVENT CARD TEMPLATE (Not Supported by Varla)
+         A binary market — title + chance arc + two large YES / NO buttons.
+         Mirrors Figma node 16164:203247.
+         ===================================================================== -->
+    <template id="market-card-single-template">
+      <!-- Mirrors Figma 16164:203247. Structure:
+           card → [head: head-left (thumb + title) + chance-arc] +
+                  [bottom: big YES/NO buttons + footer (volume + icons)]
+           See `market-card-multi-template` above for why this wrapper is
+           a <div> rather than a <button>. -->
+      <li class="market-card market-card--single">
+        <div class="market-card__inner" role="button" tabindex="0" aria-label="Open market">
+          <div class="market-card__head">
+            <div class="market-card__head-left">
+              <span class="market-card__thumb-host"></span>
+              <p class="market-card__title"></p>
+            </div>
+            <span class="chance-arc" data-chance-arc>
+              <svg class="chance-arc__svg" viewBox="0 0 60 41" aria-hidden="true">
+                <!-- Filled portion only — Figma has no behind-track. The
+                     dasharray is set by JS based on the chance percentage.
+                     Path is a 180° arc from (4, 30) up and over to (56, 30)
+                     with radius 26 — fits the 60×41 Figma frame. -->
+                <path d="M 4 30 A 26 26 0 0 1 56 30" fill="none"
+                  stroke="#946b47" stroke-width="4" stroke-linecap="round"
+                  data-chance-arc-fill="" />
+              </svg>
+              <span class="chance-arc__value">
+                <span class="chance-arc__pct" data-chance-pct>0%</span>
+                <span class="chance-arc__caption">chance</span>
+              </span>
+            </span>
+          </div>
+
+          <div class="market-card__bottom">
+            <div class="market-card__big-buttons">
+              <button type="button" class="big-btn big-btn--yes">YES</button>
+              <button type="button" class="big-btn big-btn--no">NO</button>
+            </div>
+
+            <div class="market-card__foot">
+              <span class="market-card__volume"></span>
+              <span class="market-card__icons">
+                <button type="button" class="card-icon-btn" aria-label="Boost">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <rect x="2" y="6.5" width="12" height="3" rx="0.6" stroke="currentColor" stroke-width="1.2" />
+                    <rect x="3.5" y="9.5" width="9" height="4" rx="0.6" stroke="currentColor" stroke-width="1.2" />
+                    <path d="M8 6.5v7" stroke="currentColor" stroke-width="1.2" />
+                    <path d="M5.5 6.5c-1 0-1.6-.8-1.2-1.6.4-.9 2-1.4 3.7.6.3.3.6.7.6.7s-1.7.3-3.1.3Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                    <path d="M10.5 6.5c1 0 1.6-.8 1.2-1.6-.4-.9-2-1.4-3.7.6-.3.3-.6.7-.6.7s1.7.3 3.1.3Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                  </svg>
+                </button>
+                <button type="button" class="card-icon-btn" aria-label="Bookmark">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M4 2.5h8v11l-4-2.5L4 13.5v-11Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+                  </svg>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </li>
+    </template>
+
+    <script src="market.js"></script>
+  </body>
+</html>

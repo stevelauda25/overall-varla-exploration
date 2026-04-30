@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Choose Positions to Deposit · Varla</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&family=Inter:wght@400;500&family=Geist+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="modal" aria-labelledby="modal-title">
+        <!-- Header -->
+        <header class="modal__header">
+          <span class="modal__header-spacer" aria-hidden="true"></span>
+          <h1 id="modal-title" class="modal__title">Choose Positions to Deposit</h1>
+          <button type="button" class="modal__close" aria-label="Close">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M1 1L13 13M1 13L13 1"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </header>
+
+        <!-- Body -->
+        <div class="modal__body">
+          <div class="modal__main">
+            <!-- Loading overlay — covers description + columns only, NOT the footer -->
+            <div class="loading-overlay" id="modal-loading" aria-hidden="true">
+              <svg class="loading-spinner" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Loading">
+                <g stroke="white" stroke-width="2" stroke-linecap="round">
+                  <line x1="16" y1="3" x2="16" y2="9" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.92" transform="rotate(30 16 16)" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.85" transform="rotate(60 16 16)" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.77" transform="rotate(90 16 16)" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.69" transform="rotate(120 16 16)" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.62" transform="rotate(150 16 16)" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.54" transform="rotate(180 16 16)" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.46" transform="rotate(210 16 16)" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.38" transform="rotate(240 16 16)" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.31" transform="rotate(270 16 16)" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.23" transform="rotate(300 16 16)" />
+                  <line x1="16" y1="3" x2="16" y2="9" opacity="0.15" transform="rotate(330 16 16)" />
+                </g>
+              </svg>
+            </div>
+
+            <p class="modal__description">
+              Pick which positions to deposit into VarlaCore. Everything you deposit is used
+              <br />
+              automatically as collateral and may be liquidated if your health drops.
+            </p>
+
+            <div class="modal__columns">
+            <!-- Left: Positions card -->
+            <section class="positions-card" aria-label="Positions to deposit">
+              <header class="positions-card__head">
+                <h2 class="positions-card__title">Positions to deposit</h2>
+                <p class="positions-card__subtitle">
+                  Toggle positions to include/exclude them before depositing.
+                </p>
+              </header>
+
+              <div class="positions-list-wrap">
+              <ul class="positions-list" id="positions-list">
+                <!-- Position 1 -->
+                <li class="position is-active" data-active="true" data-value="42000" data-ltv="0.80" data-liq="0.85">
+                  <div class="position__info">
+                    <img class="position__avatar" src="assets/nba.jpg" alt="" />
+                    <div class="position__text">
+                      <p class="position__title">Will the Lakers win the 2026 NBA Finals?</p>
+                      <div class="position__meta">
+                        <p class="position__value">
+                          <span class="position__value-label">Value: </span>
+                          <span class="position__value-amount">$42,000</span>
+                        </p>
+                        <span class="position__bullet">•</span>
+                        <span class="position__symbol">BTC</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="toggle" data-toggle aria-pressed="true" aria-label="Toggle position">
+                    <span class="toggle__track"></span>
+                    <span class="toggle__knob"></span>
+                  </button>
+                </li>
+
+                <!-- Position 2 -->
+                <li class="position" data-active="false" data-value="18500" data-ltv="0.65" data-liq="0.70">
+                  <div class="position__info">
+                    <img class="position__avatar" src="assets/bitcoin.jpg" alt="" />
+                    <div class="position__text">
+                      <p class="position__title">Will Bitcoin hit $200K by end of 2026?</p>
+                      <div class="position__meta">
+                        <p class="position__value">
+                          <span class="position__value-label">Value: </span>
+                          <span class="position__value-amount">$18,500</span>
+                        </p>
+                        <span class="position__bullet">•</span>
+                        <span class="position__symbol">ETH</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="toggle" data-toggle aria-pressed="false" aria-label="Toggle position">
+                    <span class="toggle__track"></span>
+                    <span class="toggle__knob"></span>
+                  </button>
+                </li>
+
+                <!-- Position 3 -->
+                <li class="position is-active" data-active="true" data-value="35750" data-ltv="0.50" data-liq="0.55">
+                  <div class="position__info">
+                    <img class="position__avatar" src="assets/concert.jpg" alt="" />
+                    <div class="position__text">
+                      <p class="position__title">Will Taylor Swift release a new album in 2026?</p>
+                      <div class="position__meta">
+                        <p class="position__value">
+                          <span class="position__value-label">Value: </span>
+                          <span class="position__value-amount">$35,750</span>
+                        </p>
+                        <span class="position__bullet">•</span>
+                        <span class="position__symbol">USDC</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="toggle" data-toggle aria-pressed="true" aria-label="Toggle position">
+                    <span class="toggle__track"></span>
+                    <span class="toggle__knob"></span>
+                  </button>
+                </li>
+
+                <!-- Position 4 -->
+                <li class="position" data-active="false" data-value="27200" data-ltv="0.50" data-liq="0.55">
+                  <div class="position__info">
+                    <img class="position__avatar" src="assets/mars.jpg" alt="" />
+                    <div class="position__text">
+                      <p class="position__title">Will SpaceX land humans on Mars by 2030?</p>
+                      <div class="position__meta">
+                        <p class="position__value">
+                          <span class="position__value-label">Value: </span>
+                          <span class="position__value-amount">$27,200</span>
+                        </p>
+                        <span class="position__bullet">•</span>
+                        <span class="position__symbol">SOL</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="toggle" data-toggle aria-pressed="false" aria-label="Toggle position">
+                    <span class="toggle__track"></span>
+                    <span class="toggle__knob"></span>
+                  </button>
+                </li>
+
+                <!-- Position 5 -->
+                <li class="position" data-active="false" data-value="25000" data-ltv="0.65" data-liq="0.70">
+                  <div class="position__info">
+                    <img class="position__avatar" src="assets/ai.jpg" alt="" />
+                    <div class="position__text">
+                      <p class="position__title">Will OpenAI release GPT-6 in 2026?</p>
+                      <div class="position__meta">
+                        <p class="position__value">
+                          <span class="position__value-label">Value: </span>
+                          <span class="position__value-amount">$25,000</span>
+                        </p>
+                        <span class="position__bullet">•</span>
+                        <span class="position__symbol">USDT</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="toggle" data-toggle aria-pressed="false" aria-label="Toggle position">
+                    <span class="toggle__track"></span>
+                    <span class="toggle__knob"></span>
+                  </button>
+                </li>
+
+                <!-- Position 6 -->
+                <li class="position" data-active="false" data-value="32500" data-ltv="0.80" data-liq="0.85">
+                  <div class="position__info">
+                    <img class="position__avatar" src="assets/soccer.jpg" alt="" />
+                    <div class="position__text">
+                      <p class="position__title">Will Real Madrid win the UCL 2026?</p>
+                      <div class="position__meta">
+                        <p class="position__value">
+                          <span class="position__value-label">Value: </span>
+                          <span class="position__value-amount">$32,500</span>
+                        </p>
+                        <span class="position__bullet">•</span>
+                        <span class="position__symbol">DAI</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="toggle" data-toggle aria-pressed="false" aria-label="Toggle position">
+                    <span class="toggle__track"></span>
+                    <span class="toggle__knob"></span>
+                  </button>
+                </li>
+
+                <!-- Position 7 -->
+                <li class="position" data-active="false" data-value="14800" data-ltv="0.65" data-liq="0.70">
+                  <div class="position__info">
+                    <img class="position__avatar" src="assets/fed.jpg" alt="" />
+                    <div class="position__text">
+                      <p class="position__title">Will the Fed cut rates 3+ times in 2026?</p>
+                      <div class="position__meta">
+                        <p class="position__value">
+                          <span class="position__value-label">Value: </span>
+                          <span class="position__value-amount">$14,800</span>
+                        </p>
+                        <span class="position__bullet">•</span>
+                        <span class="position__symbol">MATIC</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="toggle" data-toggle aria-pressed="false" aria-label="Toggle position">
+                    <span class="toggle__track"></span>
+                    <span class="toggle__knob"></span>
+                  </button>
+                </li>
+
+                <!-- Position 8 -->
+                <li class="position" data-active="false" data-value="19200" data-ltv="0.50" data-liq="0.55">
+                  <div class="position__info">
+                    <img class="position__avatar" src="assets/cinema.jpg" alt="" />
+                    <div class="position__text">
+                      <p class="position__title">Will Avatar 3 cross $2B at the box office?</p>
+                      <div class="position__meta">
+                        <p class="position__value">
+                          <span class="position__value-label">Value: </span>
+                          <span class="position__value-amount">$19,200</span>
+                        </p>
+                        <span class="position__bullet">•</span>
+                        <span class="position__symbol">AVAX</span>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="toggle" data-toggle aria-pressed="false" aria-label="Toggle position">
+                    <span class="toggle__track"></span>
+                    <span class="toggle__knob"></span>
+                  </button>
+                </li>
+              </ul>
+              <div class="scrollbar" id="scrollbar" aria-hidden="true">
+                <div class="scrollbar__thumb" id="scrollbar-thumb"></div>
+              </div>
+              </div>
+            </section>
+
+            <!-- Right: Summary + Health Factor -->
+            <aside class="summary-column">
+              <div class="summary-list">
+                <div class="summary-row">
+                  <p class="summary-row__label">Selected positions</p>
+                  <p class="summary-row__value">
+                    <span id="selected-count">2</span><span class="summary-row__value--muted">/<span id="total-count">4</span></span>
+                  </p>
+                </div>
+                <div class="summary-row">
+                  <p class="summary-row__label">Total collateral value</p>
+                  <p class="summary-row__value" id="total-collateral">$77,750</p>
+                </div>
+                <div class="summary-row">
+                  <p class="summary-row__label summary-row__label--bright">Estimated Max Loan</p>
+                  <p class="summary-row__value" id="estimated-max-loan">$51,475</p>
+                </div>
+              </div>
+
+              <div class="health-factor">
+                <div class="health-factor__head">
+                  <p class="health-factor__label">Health Factor Impact</p>
+                  <p class="health-factor__value" id="health-factor-value">1.00</p>
+                </div>
+                <div class="health-factor__bar-wrap">
+                  <div class="health-factor__bar" role="img" aria-label="Health factor: 1.52 of 2.0">
+                    <div class="health-factor__bar-half health-factor__bar-half--red" id="hf-bar-red"></div>
+                    <div class="health-factor__bar-half health-factor__bar-half--green" id="hf-bar-green"></div>
+                    <div class="health-factor__indicator" id="hf-indicator" aria-hidden="true"></div>
+                  </div>
+                  <div class="health-factor__scale">
+                    <span>0.0</span>
+                    <span>1.0</span>
+                    <span>2.0</span>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+          </div>
+
+          <!-- Footer (NOT covered by the loading overlay) -->
+          <footer class="modal__footer">
+            <button type="button" class="deposit-button">
+              <span class="deposit-button__pattern" aria-hidden="true"></span>
+              <span class="deposit-button__label">Deposit selected</span>
+            </button>
+            <p class="deposit-helper">You can&rsquo;t exclude positions after deposit.</p>
+          </footer>
+        </div>
+      </section>
+    </main>
+
+    <!-- Success modal — appears after a successful deposit -->
+    <div class="success-overlay" id="success-overlay" role="dialog" aria-labelledby="success-title" aria-modal="true">
+      <section class="success-modal">
+        <button type="button" class="success-modal__close" id="success-close" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+
+        <div class="success-modal__hero">
+          <div class="success-modal__icon-ring" aria-hidden="true">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <circle class="success-icon__circle" cx="18" cy="18" r="14" transform="rotate(-90 18 18)" stroke="white" stroke-width="2.5" />
+              <path class="success-icon__check" d="M11.5 18.5 L16 23 L24.5 13.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+            </svg>
+          </div>
+          <div class="success-modal__copy">
+            <h2 id="success-title" class="success-modal__title">Position Selected</h2>
+            <p class="success-modal__description">
+              Your position has been successfully<br />registered on Varla.
+            </p>
+          </div>
+        </div>
+
+        <div class="summary-list">
+          <div class="summary-row">
+            <p class="summary-row__label">Selected positions</p>
+            <p class="summary-row__value" id="success-selected">2</p>
+          </div>
+          <div class="summary-row">
+            <p class="summary-row__label">Total collateral value</p>
+            <p class="summary-row__value" id="success-collateral">$77,750</p>
+          </div>
+          <div class="summary-row">
+            <p class="summary-row__label summary-row__label--bright">Max loan</p>
+            <p class="summary-row__value" id="success-loan">$51,475</p>
+          </div>
+        </div>
+
+        <div class="health-factor">
+          <div class="health-factor__head">
+            <p class="health-factor__label">Health Factor Impact</p>
+            <p class="health-factor__value" id="success-hf-value">1.52</p>
+          </div>
+          <div class="health-factor__bar-wrap">
+            <div class="health-factor__bar">
+              <div class="health-factor__bar-half health-factor__bar-half--red" id="success-hf-red"></div>
+              <div class="health-factor__bar-half health-factor__bar-half--green" id="success-hf-green"></div>
+              <div class="health-factor__indicator" id="success-hf-indicator" aria-hidden="true"></div>
+            </div>
+            <div class="health-factor__scale">
+              <span>0.0</span>
+              <span>1.0</span>
+              <span>2.0</span>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="deposit-button" id="success-done">
+          <span class="deposit-button__pattern" aria-hidden="true"></span>
+          <span class="deposit-button__label">Done</span>
+        </button>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,886 @@
+/* =========================================================================
+   Design tokens (mapped from Figma variables)
+   ========================================================================= */
+:root {
+  /* Surfaces */
+  --base-special: #091325;
+  --foreground-primary: #070e1d;
+  --primary-special: #0c1931;
+  --base-white: #ffffff;
+  --page-bg: #04081a;
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.5);
+  --text-tertiary: rgba(255, 255, 255, 0.3);
+  --text-brand: #00051c;
+
+  /* Accents */
+  --accent-green: #c3e382;
+  --accent-red: #e14747;
+  --brand-blue-300: #7aa9ff;
+
+  /* Alpha overlays */
+  --alpha-white-600: rgba(255, 255, 255, 0.3);
+  --alpha-white-800: rgba(255, 255, 255, 0.1);
+  --alpha-white-900: rgba(255, 255, 255, 0.05);
+
+  /* Type */
+  --font-serif: "EB Garamond", "Times New Roman", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+
+  /* Sizing */
+  --modal-width: 920px;
+  --positions-card-width: 521px;
+  --card-radius: 6px;
+  --button-radius: 2px;
+}
+
+/* =========================================================================
+   Reset / base
+   ========================================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--page-bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+p {
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+/* =========================================================================
+   Page wrapper
+   ========================================================================= */
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+/* =========================================================================
+   Modal
+   ========================================================================= */
+.modal {
+  width: 100%;
+  max-width: var(--modal-width);
+  background: var(--base-special);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Hidden during/after a successful deposit — kept in DOM for smooth transition */
+.modal.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.97);
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid var(--alpha-white-800);
+}
+
+.modal__header-spacer {
+  width: 24px;
+  height: 24px;
+}
+
+.modal__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.modal__close {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
+}
+.modal__close:hover {
+  color: var(--text-primary);
+}
+
+.modal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  padding: 24px;
+}
+
+/* Wrapper around description + columns. Anchors the loading overlay so it
+   covers ONLY this region (i.e. excludes the footer / button group below). */
+.modal__main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Loading overlay — sits over .modal__main while the deposit is "processing" */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(7, 14, 29, 0.5);
+  display: grid;
+  place-items: center;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.loading-overlay.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Spoke-star spinner — 12 rays, decreasing opacity around the circle.
+   `steps(12)` rotates 30° per tick, advancing the bright ray clockwise. */
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  animation: loading-tick 1s steps(12) infinite;
+  transform-origin: center;
+}
+
+@keyframes loading-tick {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.modal__description {
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+
+/* =========================================================================
+   Two-column layout — both columns stretch to equal heights via flex
+   ========================================================================= */
+.modal__columns {
+  display: flex;
+  align-items: stretch;
+  gap: 24px;
+}
+
+/* =========================================================================
+   Left column — positions card
+   ========================================================================= */
+.positions-card {
+  width: var(--positions-card-width);
+  flex: 0 0 auto;
+  background: var(--primary-special);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: var(--card-radius);
+  box-shadow: inset 0 0 2px 2px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  /* Critical for inner scroll to work in a flex column */
+  min-height: 0;
+}
+
+.positions-card__head {
+  padding: 8px 4px 16px 16px;
+  border-bottom: 1px solid var(--alpha-white-900);
+}
+
+.positions-card__title {
+  margin: 0 0 8px 0;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.positions-card__subtitle {
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
+
+/* Wrapper holds the scrollable list AND the absolute-positioned scrollbar.
+   flex-basis 0 so the wrap contributes nothing to the card's intrinsic
+   height — the card stretches to match the summary column's natural
+   (hug) height, and the list scrolls inside. */
+.positions-list-wrap {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.positions-list {
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Hide native scrollbar — replaced by the JS-driven overlay below */
+  scrollbar-width: none;
+}
+.positions-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Overlay scrollbar — sits on top of list content, fades on activity */
+.scrollbar {
+  position: absolute;
+  top: 16px; /* match list padding-top */
+  bottom: 0;
+  right: 2px;
+  width: 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.scrollbar.is-active {
+  opacity: 1;
+}
+
+.scrollbar__thumb {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 99px;
+}
+
+/* =========================================================================
+   Position row
+   ========================================================================= */
+.position {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--foreground-primary);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: var(--card-radius);
+}
+
+.position__info {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transition: opacity 0.2s ease;
+}
+
+/* Dim the info block when toggle is off */
+.position[data-active="false"] .position__info {
+  opacity: 0.3;
+}
+
+.position__avatar {
+  width: 41px;
+  height: 41px;
+  flex: 0 0 41px;
+  object-fit: cover;
+}
+
+.position__text {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.position__title {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.position__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.48px;
+}
+
+.position__value,
+.position__bullet,
+.position__symbol {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.position__value-label {
+  color: var(--text-secondary);
+}
+
+.position__value-amount {
+  color: var(--text-primary);
+}
+
+.position__bullet {
+  color: var(--text-secondary);
+}
+
+.position__symbol {
+  font-weight: 500;
+  color: var(--brand-blue-300);
+}
+
+/* =========================================================================
+   Toggle switch
+   ========================================================================= */
+.toggle {
+  position: relative;
+  width: 33px;
+  height: 21px;
+  flex: 0 0 33px;
+  border-radius: 999px;
+  display: block;
+  transition: background-color 0.2s ease;
+}
+
+.toggle__track {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.toggle__knob {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #ffffff;
+  transform: translateY(-50%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.15);
+  transition: left 0.18s ease;
+}
+
+.toggle[aria-pressed="true"] .toggle__track {
+  background: linear-gradient(180deg, #d9ed9c 0%, #a9c95f 100%);
+  border-color: rgba(195, 227, 130, 0.5);
+}
+
+.toggle[aria-pressed="true"] .toggle__knob {
+  left: 14px;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--brand-blue-300);
+  outline-offset: 2px;
+}
+
+/* =========================================================================
+   Right column — summary + health factor
+   ========================================================================= */
+.summary-column {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Summary list */
+.summary-list {
+  background: var(--alpha-white-900);
+  border: 0.8px solid var(--alpha-white-800);
+  border-radius: var(--button-radius);
+  padding: 0 18px;
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+}
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  border-bottom: 0.8px solid var(--alpha-white-800);
+}
+.summary-row:last-child {
+  border-bottom: 0;
+}
+
+.summary-row__label {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--text-secondary);
+}
+.summary-row__label--bright {
+  color: var(--text-primary);
+}
+
+.summary-row__value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.56px;
+  color: var(--text-primary);
+}
+
+.summary-row__value--muted {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Health Factor */
+.health-factor {
+  background: var(--alpha-white-900);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: var(--button-radius);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: clip;
+}
+
+.health-factor__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
+}
+
+.health-factor__label {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.1;
+  color: var(--text-secondary);
+}
+
+.health-factor__value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.56px;
+  color: var(--accent-green);
+  transition: color 0.2s ease;
+}
+
+/* JS adds .is-danger when HF < 1.0 → swap green for red */
+.health-factor__value.is-danger {
+  color: var(--accent-red);
+}
+
+.health-factor__bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.health-factor__bar {
+  position: relative;
+  height: 10px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+}
+
+.health-factor__bar-half {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 10px;
+  border: 0.5px solid var(--alpha-white-900);
+  opacity: 0.5;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  box-shadow: inset 0 0 6px 0 rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.health-factor__bar-half--red {
+  background-image: url("assets/score-bar-red.png");
+  border-radius: 8px;
+}
+
+.health-factor__bar-half--green {
+  background-image: url("assets/score-bar-green.png");
+  border-radius: 8px;
+}
+
+.health-factor__indicator {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  outline: 2px solid var(--base-white);
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  transition: left 0.3s ease;
+}
+
+.health-factor__scale {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.36px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* =========================================================================
+   Footer / deposit button
+   ========================================================================= */
+.modal__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Deposit button — four states layered via pseudo-classes:
+     default → bg 100% white, strong top white inset
+     hover   → same white, deeper drop shadow (lifted)
+     pressed → bg 70% white + downward gradient, softer insets [Figma 15979:191419]
+     disabled→ bg 10% white, text tertiary, no top inset       [Figma 15979:191423]
+*/
+.deposit-button {
+  position: relative;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--button-radius);
+  background-color: var(--base-white);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    0 2px 2px 0 rgba(0, 0, 0, 0.25),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.1);
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.05s ease;
+}
+
+/* Hover — only when enabled and not currently pressed.
+   "Brighter" achieved by fading the pattern overlay so more pure white
+   shows through, plus a brighter ring and deeper drop shadow.
+   No glow halo, no transform. */
+.deposit-button:not(:disabled):hover {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 4px 12px 0 rgba(0, 0, 0, 0.4),
+    inset 0 3px 6px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* Pressed — Figma 15979:191419. No transform; the button stays in place. */
+.deposit-button:not(:disabled):active {
+  background-color: rgba(255, 255, 255, 0.7);
+  background-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    0 2px 2px 0 rgba(0, 0, 0, 0.25),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Disabled — Figma 15979:191423 */
+.deposit-button:disabled {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: not-allowed;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    0 2px 2px 0 rgba(0, 0, 0, 0.25),
+    inset 0 -2px 4px 0 rgba(0, 0, 0, 0.1);
+}
+
+.deposit-button:disabled .deposit-button__label {
+  color: var(--text-tertiary);
+}
+
+.deposit-button__pattern {
+  position: absolute;
+  inset: 0;
+  background-image: url("assets/button-bg.png");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.04;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.deposit-button:disabled .deposit-button__pattern {
+  opacity: 0.02;
+}
+.deposit-button:not(:disabled):hover .deposit-button__pattern {
+  opacity: 0.01;
+}
+.deposit-button:not(:disabled):active .deposit-button__pattern {
+  opacity: 0.03;
+}
+
+.deposit-button__label {
+  position: relative;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-brand);
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.deposit-button.is-loading {
+  cursor: progress;
+}
+
+.deposit-helper {
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--text-tertiary);
+}
+
+/* =========================================================================
+   Success modal — appears after a successful deposit
+   ========================================================================= */
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.success-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.success-modal {
+  position: relative;
+  width: 410px;
+  max-width: 100%;
+  background: var(--base-special);
+  border: 1px solid var(--alpha-white-800);
+  border-radius: var(--card-radius);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow:
+    0 4px 4px 0 rgba(0, 0, 0, 0.1),
+    inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
+  transform: scale(0.96);
+  transition: transform 0.2s ease;
+}
+
+.success-overlay.is-open .success-modal {
+  transform: scale(1);
+}
+
+.success-modal__close {
+  position: absolute;
+  top: 19px;
+  right: 19px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+  transition: color 0.15s ease;
+}
+.success-modal__close:hover {
+  color: var(--text-primary);
+}
+
+.success-modal__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.success-modal__icon-ring {
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-special);
+  border: 1px dashed var(--alpha-white-800);
+  border-radius: 999px;
+}
+
+/* Sequence on success-modal open:
+   1. Circle stroke draws in   (0 → 0.4s)
+   2. Check path draws in      (0.35 → 0.65s)
+   3. Whole icon bounces       (0.65 → 1.15s)
+   The outer dashed ring (the "circle frame") stays static. */
+
+/* Phase 1+2: paths start hidden via stroke-dashoffset = total length, then
+   animate the offset to 0 to draw them in. */
+.success-icon__circle {
+  stroke-dasharray: 88;
+  stroke-dashoffset: 88;
+}
+
+.success-icon__check {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+}
+
+.success-overlay.is-open .success-icon__circle {
+  animation: success-draw-circle 0.4s ease-out forwards;
+}
+
+.success-overlay.is-open .success-icon__check {
+  animation: success-draw-check 0.3s ease-out 0.35s forwards;
+}
+
+/* Phase 3: after drawing finishes, bounce the whole SVG with damped
+   overshoots that settle back to scale(1). */
+.success-overlay.is-open .success-modal__icon-ring > svg {
+  animation: success-icon-bounce 0.5s ease-out 0.65s;
+  transform-origin: center center;
+}
+
+@keyframes success-draw-circle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes success-draw-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes success-icon-bounce {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.22);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  72% {
+    transform: scale(1.08);
+  }
+  88% {
+    transform: scale(0.97);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.success-modal__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.success-modal__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.success-modal__description {
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--text-secondary);
+}
