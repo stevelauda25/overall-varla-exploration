@@ -1041,3 +1041,1717 @@ document.addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeTooltip();
 });
+
+
+/* =========================================================================
+   Leverage card behavior (copied from leverage-position exploration)
+   ========================================================================= */
+
+(function () {
+
+/* ---------------------------------------------------------------------------
+   Leverage card — interactivity:
+   · top tabs (Leverage position / Exit position) — visual swap only
+   · YES / NO side selector — visual swap only
+   · Amount field with 25 / 50 / 75 / MAX preset buttons
+   · 5-stop leverage slider that drives the multiplier readout (0.00× → 5×)
+   · The action button enables once an amount > 0 is entered
+   --------------------------------------------------------------------------- */
+
+const WALLET_BALANCE = 1200;
+
+/* ---------- Market constants ----------
+   Prices come from the static design (32¢ YES / 68¢ NO). YES + NO = 100¢
+   in a binary prediction market — the implied probability split. Each
+   share pays $1 if its outcome wins, $0 otherwise. */
+const YES_PRICE = 0.32;
+const NO_PRICE = 0.68;
+
+/* Tunables for the summary calculations. These approximate Polymarket-
+   style mechanics + a typical perp-style maintenance margin. Replace
+   with the real Varla numbers once the docs are available.
+
+   - PRICE_IMPACT_PER_DOLLAR: linear slippage model. 1% impact per $1k
+     of position size, capped at 5% so absurdly large entries don't
+     produce nonsense numbers.
+   - MAINTENANCE_MARGIN: minimum equity-to-position ratio before the
+     position is liquidated. 5% is a common DeFi default. */
+const PRICE_IMPACT_PER_DOLLAR = 0.001 / 100; // 0.001% per $1
+const MAX_PRICE_IMPACT = 0.05; // 5%
+const MAINTENANCE_MARGIN = 0.05;
+
+/* ---------- Top tabs ---------- */
+const tabs = document.querySelectorAll(".tab");
+const panels = document.querySelectorAll(".panel");
+tabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    tabs.forEach((t) => {
+      const active = t === tab;
+      t.classList.toggle("is-active", active);
+      t.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    const target = tab.dataset.tab;
+    panels.forEach((p) => {
+      p.hidden = p.dataset.panel !== target;
+    });
+  });
+});
+
+/* ---------- YES / NO side selector ---------- */
+const sideButtons = document.querySelectorAll(".side-btn");
+sideButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    sideButtons.forEach((b) => {
+      const active = b === btn;
+      b.classList.toggle("is-active", active);
+      b.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    // Side change → reprice the summary (different YES vs NO base price).
+    updateSummary();
+  });
+});
+
+/* ---------- Amount input + percent presets ---------- */
+const amountInput = document.querySelector(".amount-card__input");
+const percentButtons = document.querySelectorAll(".percent-btn");
+const actionBtn = document.getElementById("action-btn");
+
+function setAmount(value) {
+  // Round to 2 decimals; allow empty to clear.
+  amountInput.value = value === "" ? "" : Number(value).toFixed(2);
+  syncActionState();
+}
+
+percentButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    percentButtons.forEach((b) => b.classList.toggle("is-active", b === btn));
+    const pct = parseInt(btn.dataset.percent, 10) / 100;
+    setAmount(WALLET_BALANCE * pct);
+  });
+});
+
+amountInput?.addEventListener("input", () => {
+  // Typing manually clears any active percent preset — value no longer
+  // tied to a fixed fraction of wallet.
+  percentButtons.forEach((b) => b.classList.remove("is-active"));
+  syncActionState();
+});
+
+/* ---------- Leverage slider ----------
+   Range 0 → 5 in 0.5 steps (11 stops). Display defaults to "0.00 ×" in
+   text-secondary; flips to text-primary once the user moves past zero. */
+const slider = document.querySelector(".leverage-slider");
+const sliderInput = slider?.querySelector(".leverage-slider__input");
+const sliderFill = slider?.querySelector(".leverage-slider__fill");
+const leverageNumEl = document.querySelector(".leverage-value__num");
+const leverageValueEl = document.querySelector(".leverage-value");
+
+function syncSlider() {
+  if (!slider || !sliderInput) return;
+  const value = parseFloat(sliderInput.value);
+  const min = parseFloat(sliderInput.min) || 0;
+  const max = parseFloat(sliderInput.max) || 5;
+  const pct = (value - min) / (max - min); // 0..1
+
+  // Drive fill via CSS variable; the calc() in CSS handles the thumb
+  // offset so the fill ends exactly at the thumb's center.
+  slider.style.setProperty("--pct", pct);
+  if (leverageNumEl) leverageNumEl.textContent = value.toFixed(2);
+  leverageValueEl?.classList.toggle("is-active", value > 0);
+
+  slider.dataset.value = value;
+  updateSummary();
+}
+
+/* Magnetic snap: when the user drags within ±SNAP_RADIUS of a whole
+   number (0, 1, 2, 3, 4, 5), pull the value to that whole number. Outside
+   the snap radius the value stays continuous, so the user retains free
+   movement between stops. */
+const SNAP_RADIUS = 0.15;
+
+sliderInput?.addEventListener("input", () => {
+  const raw = parseFloat(sliderInput.value);
+  const rounded = Math.round(raw);
+  if (Math.abs(raw - rounded) < SNAP_RADIUS) {
+    sliderInput.value = rounded;
+  }
+  syncSlider();
+});
+
+syncSlider();
+
+/* ---------- Action button enable/disable + wallet-cap validation ----------
+   Button starts disabled (matches the Figma muted state). It activates
+   when the user enters a positive amount that doesn't exceed the wallet
+   balance. Going over the wallet flips the amount card into the error
+   state (red border + error message) — same pattern as settings-modal. */
+const amountCard = document.querySelector(".amount-card");
+
+function syncActionState() {
+  if (!actionBtn) return;
+  const amount = parseFloat(amountInput?.value);
+  const hasAmount = !Number.isNaN(amount) && amount > 0;
+  const exceedsWallet = hasAmount && amount > WALLET_BALANCE;
+
+  amountCard?.classList.toggle("has-error", exceedsWallet);
+  actionBtn.disabled = !hasAmount || exceedsWallet;
+
+  updateSummary();
+}
+
+/* ---------- Summary calculations ----------
+   Approximations for the four summary rows. These follow standard
+   prediction-market mechanics with a perp-style maintenance margin —
+   reasonable defaults until the actual Varla docs are available.
+
+   Position size  = amount × leverage
+   Price impact   = positionSize × PRICE_IMPACT_PER_DOLLAR  (capped)
+   Avg fill price = currentPrice × (1 + impact / 2)
+   Shares         = positionSize / avgPrice           (each pays $1 on win)
+   Liquidation    = debt / (shares × (1 − MAINT_MARGIN))   (leverage > 1)
+   Reward         = shares × (1 − avgPrice)           (profit if win) */
+function getCurrentSide() {
+  const yesActive = document.querySelector(".side-btn--yes")?.classList.contains("is-active");
+  return yesActive ? "yes" : "no";
+}
+
+function calcSummary() {
+  const amount = parseFloat(amountInput?.value) || 0;
+  const leverage = parseFloat(sliderInput?.value) || 0;
+  const side = getCurrentSide();
+  const currentPrice = side === "yes" ? YES_PRICE : NO_PRICE;
+
+  // No-position cases: empty amount, zero leverage, or over-wallet error.
+  if (amount <= 0 || leverage <= 0 || amount > WALLET_BALANCE) {
+    return { impact: 0, avgPrice: 0, liqPrice: 0, reward: 0 };
+  }
+
+  const positionSize = amount * leverage;
+  const impact = Math.min(MAX_PRICE_IMPACT, positionSize * PRICE_IMPACT_PER_DOLLAR);
+  const avgPrice = currentPrice * (1 + impact / 2);
+  const shares = positionSize / avgPrice;
+
+  // No leverage (1×) means no borrowed capital → no liquidation event;
+  // the user can only lose their own collateral.
+  let liqPrice = 0;
+  if (leverage > 1) {
+    const debt = amount * (leverage - 1);
+    liqPrice = debt / (shares * (1 - MAINTENANCE_MARGIN));
+  }
+
+  const reward = shares * (1 - avgPrice);
+
+  return { impact, avgPrice, liqPrice, reward };
+}
+
+function fmtPrice(n) {
+  if (n <= 0) return "$0";
+  // Sub-dollar share prices benefit from extra precision.
+  return "$" + n.toFixed(n < 0.1 ? 4 : 2);
+}
+
+function fmtCurrency(n) {
+  if (n <= 0) return "$0.00";
+  return "$" + n.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function updateSummary() {
+  const { impact, avgPrice, liqPrice, reward } = calcSummary();
+  const set = (key, value) => {
+    const el = document.querySelector(`[data-summary="${key}"]`);
+    if (el) el.textContent = value;
+  };
+  set("impact", (impact * 100).toFixed(2) + "%");
+  set("avg", fmtPrice(avgPrice));
+  set("liq", fmtPrice(liqPrice));
+  set("reward", fmtCurrency(reward));
+}
+
+syncActionState();
+
+/* ---------------------------------------------------------------------------
+   Exit panel — close (or partially close) an existing position.
+
+   Mock position state — these would come from real account data once wired up.
+   The summary scales linearly with the close fraction, the HF indicator
+   slides between currentHf and projectedHf, and the close button enables
+   only once a positive amount within the position value is entered. */
+const EXIT_POSITION = {
+  positionValue: 4200,    // total notional position (collateral × leverage)
+  collateral: 2400,       // user's released collateral at 100% close
+  leverage: 2.0,
+  side: "yes",            // side of the open position (drives the YES/NO tag)
+  exitPrice: 0.3245,      // simulated avg fill price after small slippage
+  totalPnl: 336.40,       // positive = profit, negative = loss (at 100% close)
+  liquidationPrice: 0.225,
+  networkFee: 0.45,       // flat
+  currentHf: 1.45,        // before close
+  projectedHfFullClose: 1.52, // HF if everything is closed
+  hfBarMin: 0,
+  hfBarMax: 2,
+};
+
+const exitInput = document.getElementById("exit-amount");
+const exitCard = exitInput?.closest(".amount-card");
+const exitPercentBtns = document.querySelectorAll("[data-exit-percent]");
+const closeBtn = document.getElementById("close-btn");
+const hfIndicator = document.querySelector('[data-hf="indicator"]');
+const hfBefore = document.querySelector('[data-hf="before"]');
+const hfAfter = document.querySelector('[data-hf="after"]');
+
+function setExitAmount(value) {
+  if (!exitInput) return;
+  exitInput.value = value === "" ? "" : Number(value).toFixed(2);
+  syncExit();
+}
+
+function calcExit() {
+  const amount = parseFloat(exitInput?.value) || 0;
+  const pct = Math.min(1, amount / EXIT_POSITION.positionValue);
+  const value = EXIT_POSITION.collateral * pct;
+  const pnl = EXIT_POSITION.totalPnl * pct;
+  const fee = pct > 0 ? EXIT_POSITION.networkFee : 0;
+  const reward = pct > 0 ? value + pnl - fee : 0;
+  // Closing 100% leaves no position → no liquidation. Below that, the
+  // existing position keeps its leverage, so the liq price is unchanged.
+  const liqPrice = pct >= 1 ? 0 : pct > 0 ? EXIT_POSITION.liquidationPrice : 0;
+  // HF improves linearly toward the fully-closed HF.
+  const newHf =
+    EXIT_POSITION.currentHf +
+    (EXIT_POSITION.projectedHfFullClose - EXIT_POSITION.currentHf) * pct;
+  return { amount, pct, value, pnl, fee, reward, liqPrice, newHf };
+}
+
+function fmtSigned(n) {
+  // Match the Figma copy: "+$168.20" / "-$50.00".
+  const sign = n >= 0 ? "+" : "-";
+  return sign + fmtCurrency(Math.abs(n));
+}
+
+function syncExit() {
+  if (!exitInput || !exitCard) return;
+  const { amount, value, pnl, fee, reward, liqPrice, newHf } = calcExit();
+  const exceeds = amount > EXIT_POSITION.positionValue;
+  exitCard.classList.toggle("has-error", exceeds);
+
+  // Validity: positive amount within position size.
+  const valid = amount > 0 && !exceeds;
+  if (closeBtn) closeBtn.disabled = !valid;
+
+  const set = (key, val) => {
+    const el = document.querySelector(`[data-exit-summary="${key}"]`);
+    if (el) el.textContent = val;
+  };
+  set("value", fmtCurrency(value));
+  set("leverage", EXIT_POSITION.leverage.toFixed(1) + "×");
+  set("liq", "$" + liqPrice.toFixed(2));
+  set("fee", fee > 0 ? "~" + fmtCurrency(fee) : "~$0.00");
+  set("reward", fmtCurrency(reward));
+
+  // PnL row — sign-prefixed and recolored for losses.
+  const pnlEl = document.querySelector('[data-exit-summary="pnl"]');
+  if (pnlEl) {
+    pnlEl.textContent = fmtSigned(pnl);
+    pnlEl.classList.toggle("is-loss", pnl < 0);
+  }
+
+  // HF indicator: position along the 0→2 bar (clamped).
+  if (hfIndicator) {
+    const range = EXIT_POSITION.hfBarMax - EXIT_POSITION.hfBarMin;
+    const pct = Math.max(0, Math.min(1, (newHf - EXIT_POSITION.hfBarMin) / range));
+    hfIndicator.style.left = pct * 100 + "%";
+  }
+  if (hfBefore) hfBefore.textContent = EXIT_POSITION.currentHf.toFixed(2);
+  if (hfAfter) hfAfter.textContent = newHf.toFixed(2);
+}
+
+exitInput?.addEventListener("input", () => {
+  // Typing manually clears any active percent preset.
+  exitPercentBtns.forEach((b) => b.classList.remove("is-active"));
+  syncExit();
+});
+
+exitPercentBtns.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    exitPercentBtns.forEach((b) => b.classList.toggle("is-active", b === btn));
+    const pct = parseInt(btn.dataset.exitPercent, 10) / 100;
+    setExitAmount(EXIT_POSITION.positionValue * pct);
+  });
+});
+
+syncExit();
+
+/* ---------------------------------------------------------------------------
+   Leverage trade flow: loading → success
+   - "Leverage" action button enters a loading state (spinner over form,
+     button label "Processing...", button disabled) for ~1.5s.
+   - When loading completes, snapshots the trade into the success card
+     and opens the success popup with its draw/bounce icon animation.
+   - Success popup closes via Done, X, backdrop, or Esc.
+   --------------------------------------------------------------------------- */
+const successOverlay = document.getElementById("success-overlay");
+const loadingOverlay = document.getElementById("leverage-loading");
+const actionLabel = actionBtn?.querySelector(".action-btn__label");
+const ORIGINAL_ACTION_LABEL = actionLabel?.textContent || "Leverage";
+const LOADING_DURATION_MS = 1500;
+
+function openPopup(overlay) {
+  if (!overlay) return;
+  overlay.hidden = false;
+  void overlay.offsetWidth; // force reflow so the open transition runs
+  overlay.classList.add("is-open");
+}
+
+function closePopup(overlay) {
+  if (!overlay) return;
+  overlay.classList.remove("is-open");
+  setTimeout(() => { overlay.hidden = true; }, 200);
+}
+
+/* Format helpers used only for the success summary. */
+function fmtCents(p) {
+  if (p <= 0) return "0¢";
+  return (p * 100).toFixed(p < 0.1 ? 2 : 1) + "¢";
+}
+
+function fmtShares(n) {
+  if (n <= 0) return "0 SHARES";
+  return n.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }) + " SHARES";
+}
+
+/* Snapshot the live trade values into the success card. Called on
+   confirmation so the user sees the exact numbers they committed. */
+function populateSuccess() {
+  const amount = parseFloat(amountInput?.value) || 0;
+  const leverage = parseFloat(sliderInput?.value) || 0;
+  const side = getCurrentSide();
+  const { avgPrice, liqPrice, reward } = calcSummary();
+  const positionSize = amount * leverage;
+  const shares = avgPrice > 0 ? positionSize / avgPrice : 0;
+
+  const set = (key, value) => {
+    const el = document.querySelector(`[data-success="${key}"]`);
+    if (el) el.textContent = value;
+  };
+
+  set("market", "Fed Rate Cut Dec?");
+  // Side: keep using the .side-tag pill but swap colour + label.
+  const sideEl = document.querySelector('[data-success="side"]');
+  if (sideEl) {
+    sideEl.textContent = side.toUpperCase();
+    sideEl.className = `side-tag side-tag--${side} side-tag--sm`;
+  }
+  set("amount", "$" + amount.toLocaleString("en-US", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2,
+  }));
+  set("leverage", leverage.toFixed(1) + "×");
+  set("avgEntry", fmtCents(avgPrice));
+  set("shares", fmtShares(shares));
+  set("liq", fmtCents(liqPrice));
+  set("reward", fmtCurrency(reward));
+}
+
+/* Toggle the loading state across the panel. The overlay covers the
+   form area and the action button switches to a "Processing..." label
+   and goes disabled so the user can't double-click. */
+function setLeverageLoading(loading) {
+  if (!actionBtn || !loadingOverlay) return;
+  loadingOverlay.classList.toggle("is-active", loading);
+  loadingOverlay.setAttribute("aria-hidden", loading ? "false" : "true");
+  actionBtn.disabled = loading || actionBtn.dataset.naturallyDisabled === "true";
+  if (actionLabel) {
+    actionLabel.textContent = loading ? "Processing..." : ORIGINAL_ACTION_LABEL;
+  }
+}
+
+actionBtn?.addEventListener("click", () => {
+  if (actionBtn.disabled) return;
+  // Stash whether the button was already disabled so we restore correctly.
+  actionBtn.dataset.naturallyDisabled = "false";
+  setLeverageLoading(true);
+  setTimeout(() => {
+    setLeverageLoading(false);
+    populateSuccess();
+    // Sync the trade details into the Exit tab so switching tabs after
+    // confirming reveals the just-opened position rather than the demo
+    // mock data.
+    commitOpenPosition();
+    openPopup(successOverlay);
+  }, LOADING_DURATION_MS);
+});
+
+document.getElementById("success-close")?.addEventListener("click", () => closePopup(successOverlay));
+document.getElementById("success-done")?.addEventListener("click", () => closePopup(successOverlay));
+
+successOverlay?.addEventListener("click", (e) => {
+  if (e.target === successOverlay) closePopup(successOverlay);
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && successOverlay?.classList.contains("is-open")) {
+    closePopup(successOverlay);
+  }
+});
+
+/* ---------------------------------------------------------------------------
+   Exit close flow: loading → success
+   - "Close Position" button enters a loading state (spinner over form,
+     button label "Processing...", button disabled) for ~1.5s.
+   - When loading completes, snapshots the close into the exit-success
+     card and opens the success popup.
+   - Closes via Done, X, backdrop, or Esc.
+   --------------------------------------------------------------------------- */
+const exitSuccessOverlay = document.getElementById("exit-success-overlay");
+const exitLoadingOverlay = document.getElementById("exit-loading");
+const closeLabel = closeBtn?.querySelector(".close-btn__label");
+const ORIGINAL_CLOSE_LABEL = closeLabel?.textContent || "Close Position";
+
+function setExitLoading(loading) {
+  if (!closeBtn || !exitLoadingOverlay) return;
+  exitLoadingOverlay.classList.toggle("is-active", loading);
+  exitLoadingOverlay.setAttribute("aria-hidden", loading ? "false" : "true");
+  closeBtn.disabled = loading;
+  if (closeLabel) {
+    closeLabel.textContent = loading ? "Processing..." : ORIGINAL_CLOSE_LABEL;
+  }
+}
+
+/* Snapshot the live exit values into the success card. */
+function populateExitSuccess() {
+  const amount = parseFloat(exitInput?.value) || 0;
+  const { pnl, fee, reward } = calcExit();
+  const side = EXIT_POSITION.side;
+
+  const set = (key, value) => {
+    const el = document.querySelector(`[data-exit-success="${key}"]`);
+    if (el) el.textContent = value;
+  };
+
+  set("market", "Fed Rate Cut Dec?");
+
+  // Side: keep the .side-tag pill but swap colour + label per side.
+  const sideEl = document.querySelector('[data-exit-success="side"]');
+  if (sideEl) {
+    sideEl.textContent = side.toUpperCase();
+    sideEl.className = `side-tag side-tag--${side} side-tag--sm`;
+  }
+
+  set("leverage", EXIT_POSITION.leverage.toFixed(1) + "×");
+  set("closedAmount", "$" + amount.toLocaleString("en-US", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2,
+  }));
+  set("exitPrice", fmtCents(EXIT_POSITION.exitPrice));
+  set("fee", fee > 0 ? "~" + fmtCurrency(fee) : "~$0.00");
+  set("netReceived", fmtCurrency(reward));
+
+  // PnL — sign-prefixed and recoloured for losses (green default → red on loss).
+  const pnlEl = document.querySelector('[data-exit-success="pnl"]');
+  if (pnlEl) {
+    pnlEl.textContent = fmtSigned(pnl);
+    pnlEl.classList.toggle("success-row__value--profit", pnl >= 0);
+    pnlEl.classList.toggle("success-row__value--loss", pnl < 0);
+  }
+}
+
+closeBtn?.addEventListener("click", () => {
+  if (closeBtn.disabled) return;
+  setExitLoading(true);
+  setTimeout(() => {
+    setExitLoading(false);
+    populateExitSuccess();
+    openPopup(exitSuccessOverlay);
+  }, LOADING_DURATION_MS);
+});
+
+document.getElementById("exit-success-close")?.addEventListener("click", () => closePopup(exitSuccessOverlay));
+document.getElementById("exit-success-done")?.addEventListener("click", () => closePopup(exitSuccessOverlay));
+
+exitSuccessOverlay?.addEventListener("click", (e) => {
+  if (e.target === exitSuccessOverlay) closePopup(exitSuccessOverlay);
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && exitSuccessOverlay?.classList.contains("is-open")) {
+    closePopup(exitSuccessOverlay);
+  }
+});
+
+/* ---------------------------------------------------------------------------
+   Cross-tab connection — Leverage → Exit
+   When a leverage trade is committed, copy the trade details onto the
+   shared EXIT_POSITION state and re-render the Exit panel so the side
+   tag, leverage display, position value, and summary all reflect the
+   newly-opened position.
+   --------------------------------------------------------------------------- */
+function commitOpenPosition() {
+  const amount = parseFloat(amountInput?.value) || 0;
+  const leverage = parseFloat(sliderInput?.value) || 0;
+  const side = getCurrentSide();
+  const { avgPrice, liqPrice } = calcSummary();
+  const positionSize = amount * leverage;
+  const shares = avgPrice > 0 ? positionSize / avgPrice : 0;
+
+  // Simulate a small post-entry price drift in the user's favour so the
+  // Exit panel has a non-zero PnL to show. For YES, price drifts up;
+  // for NO, the YES price drifts down (NO gains). The exit fill price
+  // adds a half-percent slippage in the opposite direction.
+  const basePrice = side === "yes" ? YES_PRICE : NO_PRICE;
+  const driftedPrice = basePrice + (side === "yes" ? 0.02 : -0.02);
+  const exitPrice = driftedPrice * (1 - 0.005);
+
+  // Mutate in place so existing references (closures, etc.) keep working.
+  EXIT_POSITION.side = side;
+  EXIT_POSITION.leverage = leverage;
+  EXIT_POSITION.collateral = amount;
+  EXIT_POSITION.positionValue = positionSize;
+  EXIT_POSITION.avgEntryPrice = avgPrice;
+  EXIT_POSITION.shares = shares;
+  EXIT_POSITION.exitPrice = exitPrice;
+  EXIT_POSITION.totalPnl = shares * (exitPrice - avgPrice);
+  EXIT_POSITION.liquidationPrice = liqPrice;
+
+  renderExitPanel();
+}
+
+function renderExitPanel() {
+  // Compact market card — side tag colour + label follow the position side.
+  const exitSideTag = document.querySelector(
+    '[data-panel="exit"] .market--compact .side-tag'
+  );
+  if (exitSideTag) {
+    exitSideTag.textContent = EXIT_POSITION.side.toUpperCase();
+    exitSideTag.className = `side-tag side-tag--${EXIT_POSITION.side}`;
+  }
+
+  // Amount card header — "VALUE:$X,XXX • LEV:Yx" reflects current position.
+  const valueHeader = document.querySelector(
+    '[data-panel="exit"] .amount-card__wallet'
+  );
+  if (valueHeader) {
+    const lev = EXIT_POSITION.leverage;
+    const levStr = lev % 1 === 0 ? lev.toFixed(0) : lev.toFixed(1);
+    const valStr = EXIT_POSITION.positionValue.toLocaleString("en-US", {
+      maximumFractionDigits: 0,
+    });
+    valueHeader.textContent = `VALUE:$${valStr} • LEV:${levStr}×`;
+  }
+
+  // Reset the exit form so the new position starts at zero close amount.
+  if (exitInput) exitInput.value = "";
+  exitPercentBtns.forEach((b) => b.classList.remove("is-active"));
+  syncExit();
+}
+
+
+/* =========================================================================
+   Market detail tab/period/orderbook behavior (from market-details)
+   ========================================================================= */
+
+/* ---------------------------------------------------------------------------
+   Market Details — page-local interactivity.
+   The leverage card on the right has its own behavior wired up by
+   ../leverage-position/leverage.js. All this file handles is:
+   · the inner detail-tabs (Market Overview / Order Book / Your Trades / Your Performance)
+   · the graph period buttons (1H / 6H / 1W / 1M / 1Y / ALL TIME) — visual swap only
+   · the Order Book Trade Yes / Trade No toggle — visual swap only
+   --------------------------------------------------------------------------- */
+
+/* ---------- Detail tabs ---------- */
+const detailTabs = document.querySelectorAll(".detail-tab");
+const detailPanels = document.querySelectorAll(".detail-tabs__panel");
+
+detailTabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    const target = tab.dataset.detailTab;
+    detailTabs.forEach((t) => {
+      const active = t === tab;
+      t.classList.toggle("is-active", active);
+      t.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    detailPanels.forEach((p) => {
+      p.hidden = p.dataset.detailPanel !== target;
+    });
+  });
+});
+
+/* ---------- Probability graph (data-driven, Polymarket-style) ----------
+   - Single source of truth: a synthetic random-walk series of YES prices
+     in [0,1]. NO is computed as (1 - YES) so the lines are true mirror
+     images, matching how a binary prediction market actually behaves.
+   - Period buttons regenerate the series for the chosen window and
+     re-render the SVG paths, the right-edge value badges, and the
+     X-axis date/time ticks.
+   - Hover anywhere over the plot to show a crosshair + tooltip with the
+     timestamp and the YES/NO probability at that point. */
+(function () {
+  const MINUTE = 60 * 1000;
+  const HOUR = 60 * MINUTE;
+  const DAY = 24 * HOUR;
+
+  // Each period defines its time span, the target number of points
+  // the visible slice should be downsampled to, and the count of
+  // x-axis labels the design slot can comfortably fit.
+  const periods = {
+    "1H":  { spanMs: 1 * HOUR,    points: 60,  xTicks: 6 },
+    "6H":  { spanMs: 6 * HOUR,    points: 72,  xTicks: 6 },
+    "1W":  { spanMs: 7 * DAY,     points: 168, xTicks: 7 },
+    "1M":  { spanMs: 30 * DAY,    points: 60,  xTicks: 5 },
+    "1Y":  { spanMs: 365 * DAY,   points: 52,  xTicks: 6 },
+    "ALL": { spanMs: 730 * DAY,   points: 80,  xTicks: 6 },
+  };
+  // The headline & badges quote a fixed "current" probability — anchor
+  // the master's final sample here so every period slice lands on the
+  // same end-of-window value.
+  const FINAL_YES = 0.38;
+
+  /* ONE master series, generated once on page load. The line shape is
+     stable across period changes — switching periods only re-slices and
+     downsamples this same series, so the chart "zooms" rather than
+     redraws. Resolution adapts by recency:
+       · last 24h at 1-min granularity (so 1H/6H zooms feel detailed)
+       · 24h–730d at 30-min granularity (keeps total ~36k points, ~1MB)
+     Random walk has a smaller per-step σ on the recent portion, scaled
+     so accumulated wiggle over equal time stays comparable across the
+     two granularities (sqrt(N) scaling).
+     A long tail blend (120 samples) toward FINAL_YES guarantees every
+     slice's last point lands on the headline value. */
+  const masterSeries = (function generateMaster() {
+    const out = [];
+    const now = Date.now();
+    const oldest = now - 730 * DAY;
+    const recentStart = now - 1 * DAY;
+    const olderStep = 30 * MINUTE;
+    const recentStep = 1 * MINUTE;
+
+    let yes = 0.4 + Math.random() * 0.2;
+    let momentum = 0;
+
+    // Low per-step σ + high momentum decay → calm, low-volatility walk.
+    // Accumulated noise across the full master (~36k steps) stays small
+    // (sqrt(N)·σ ≈ 0.19), so the line drifts gently rather than jittering.
+    for (let t = oldest; t < recentStart; t += olderStep) {
+      momentum = momentum * 0.95 + (Math.random() - 0.5) * 0.001;
+      yes = Math.max(0.05, Math.min(0.95, yes + momentum));
+      out.push({ t, yes });
+    }
+    for (let t = recentStart; t <= now; t += recentStep) {
+      momentum = momentum * 0.97 + (Math.random() - 0.5) * 0.0005;
+      yes = Math.max(0.05, Math.min(0.95, yes + momentum));
+      out.push({ t, yes });
+    }
+
+    const tailLen = Math.min(120, out.length);
+    const tailStart = out.length - tailLen;
+    for (let i = 0; i < tailLen; i++) {
+      const blend = i / (tailLen - 1);
+      out[tailStart + i].yes =
+        out[tailStart + i].yes * (1 - blend) + FINAL_YES * blend;
+    }
+    out[out.length - 1].yes = FINAL_YES;
+    return out;
+  })();
+
+  /* Slice the master to a period's window + downsample to its target
+     point count. Cheap to call (binary search + one allocation), so we
+     run it on every period change. */
+  function getPeriodSeries(period) {
+    const cfg = periods[period];
+    const cutoff = Date.now() - cfg.spanMs;
+
+    // First sample at or after the cutoff time.
+    let lo = 0, hi = masterSeries.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (masterSeries[mid].t < cutoff) lo = mid + 1;
+      else hi = mid;
+    }
+    const slice = masterSeries.slice(lo);
+    if (slice.length <= cfg.points) return slice;
+
+    // Even-spaced picking — always includes the first and last samples
+    // so the rendered line's endpoints stay anchored.
+    const out = new Array(cfg.points);
+    for (let i = 0; i < cfg.points; i++) {
+      const idx = Math.round((i * (slice.length - 1)) / (cfg.points - 1));
+      out[i] = slice[idx];
+    }
+    return out;
+  }
+
+  /* Convert a series to a smooth SVG cubic-Bezier path string. The
+     viewBox is 0..100 in both axes with preserveAspectRatio=none, so we
+     map sample index → x in [0,100] and yes-probability → y where 0=top
+     (100% probability) and 100=bottom (0% probability). */
+  function pathFor(series, projectY) {
+    if (!series.length) return "";
+    const pts = series.map((s, i) => ({
+      x: (i / (series.length - 1)) * 100,
+      y: projectY(s) * 100,
+    }));
+    let d = `M${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const p0 = pts[i - 1];
+      const p1 = pts[i];
+      const dx = (p1.x - p0.x) * 0.5;
+      d += ` C${(p0.x + dx).toFixed(2)},${p0.y.toFixed(2)} ${(p1.x - dx).toFixed(2)},${p1.y.toFixed(2)} ${p1.x.toFixed(2)},${p1.y.toFixed(2)}`;
+    }
+    return d;
+  }
+
+  /* Pick `count` evenly-spaced timestamps from the series and format
+     each according to the chosen period's natural granularity. */
+  function xLabelsFor(series, period) {
+    const cfg = periods[period];
+    const labels = [];
+    const fmtTime = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric", minute: "2-digit", hour12: false,
+    });
+    const fmtMonthDay = new Intl.DateTimeFormat("en-US", {
+      month: "short", day: "numeric",
+    });
+    const fmtMonthYear = new Intl.DateTimeFormat("en-US", {
+      month: "short", year: "2-digit",
+    });
+    for (let i = 0; i < cfg.xTicks; i++) {
+      const idx = Math.round((i * (series.length - 1)) / (cfg.xTicks - 1));
+      const d = new Date(series[idx].t);
+      let s;
+      if (period === "1H" || period === "6H") s = fmtTime.format(d);
+      else if (period === "1W" || period === "1M") s = fmtMonthDay.format(d).toUpperCase();
+      else s = fmtMonthYear.format(d).toUpperCase();
+      labels.push(s);
+    }
+    return labels;
+  }
+
+  /* Tooltip uses the period to decide whether to show "Aug 24, 14:30"
+     vs "Aug 24" vs "Aug 2026". Mirrors what Polymarket does. */
+  function formatTooltipDate(t, period) {
+    const d = new Date(t);
+    if (period === "1H" || period === "6H") {
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: false,
+      }).format(d);
+    }
+    if (period === "1W" || period === "1M") {
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short", day: "numeric",
+      }).format(d);
+    }
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short", year: "numeric",
+    }).format(d);
+  }
+
+  // Cached element handles
+  const plot = document.querySelector(".graph__plot");
+  const yesPathEl = document.querySelector(".graph__line--yes");
+  const endDotEl = document.querySelector(".graph__end-dot");
+  const xAxisEl = document.querySelector(".graph__x-axis");
+  const chanceEl = document.querySelector(".graph__chance");
+  const deltaEl = document.querySelector(".graph__delta");
+  const deltaValEl = document.querySelector(".graph__delta-val");
+  const periodBtns = document.querySelectorAll(".period-btn");
+
+  /* Number-tween helper — animates an element's textContent toward
+     `target` with a cubic-out ease. Tracks the CURRENT animated value
+     (not just the previous target) so interrupted tweens resume from
+     wherever the value happens to be on screen — without that, rapid
+     hover/period changes can briefly snap the displayed number (and
+     the up/down class derived from its sign) to a stale state. */
+  const tweenCurrent = new WeakMap();
+  const tweenRaf = new WeakMap();
+  function tweenNumber(el, target, formatter, onFrame, duration = 280) {
+    const prevRaf = tweenRaf.get(el);
+    if (prevRaf) cancelAnimationFrame(prevRaf);
+    const from = tweenCurrent.get(el);
+    if (from === undefined || Math.abs(from - target) < 1e-6) {
+      tweenCurrent.set(el, target);
+      el.textContent = formatter(target);
+      onFrame && onFrame(target);
+      return;
+    }
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const current = from + (target - from) * eased;
+      tweenCurrent.set(el, current);
+      el.textContent = formatter(current);
+      onFrame && onFrame(current);
+      if (t < 1) {
+        tweenRaf.set(el, requestAnimationFrame(step));
+      } else {
+        tweenCurrent.set(el, target);
+        el.textContent = formatter(target);
+        onFrame && onFrame(target);
+        tweenRaf.delete(el);
+      }
+    }
+    tweenRaf.set(el, requestAnimationFrame(step));
+  }
+
+  // Set chance + delta to the values for sample at index `idx`. Delta
+  // is always computed against the FIRST sample of the active series,
+  // so it reads as "change since start of period" — same semantic as
+  // the PnL graph's delta.
+  function setHeadline(idx, animate) {
+    if (!activeSeries.length) return;
+    const yes = activeSeries[idx].yes;
+    const firstYes = activeSeries[0].yes;
+    const chancePct = yes * 100;
+    const deltaPct = (yes - firstYes) * 100;
+    const dur = animate ? 280 : 0;
+    if (chanceEl) {
+      tweenNumber(
+        chanceEl,
+        chancePct,
+        (v) => `${Math.round(v)}% Chance`,
+        null,
+        dur
+      );
+    }
+    if (deltaValEl) {
+      tweenNumber(
+        deltaValEl,
+        deltaPct,
+        (v) => `${Math.round(Math.abs(v))}%`,
+        (v) => {
+          if (deltaEl) deltaEl.classList.toggle("graph__delta--down", v < 0);
+        },
+        dur
+      );
+    }
+  }
+  // The line-stroke gradient stops we shift on hover. Stops 0 and 1 are
+  // the primary-color portion (left of cursor); stops 2 and 3 are the
+  // muted-gray portion (right of cursor). Both pairs sit at 100% by
+  // default so the entire line reads in primary color.
+  const gradStops = document.querySelectorAll("#graph-line-gradient stop");
+
+  if (!plot || !yesPathEl) return;
+
+  /* Crosshair overlay — built once, then positioned on every mousemove. */
+  const crosshair = document.createElement("div");
+  crosshair.className = "graph__crosshair";
+  crosshair.hidden = true;
+  crosshair.innerHTML = `
+    <div class="graph__crosshair-line"></div>
+    <span class="graph__crosshair-dot graph__crosshair-dot--yes"></span>
+    <span class="graph__crosshair-dot graph__crosshair-dot--no"></span>
+    <div class="graph__crosshair-tooltip">
+      <div class="graph__crosshair-time"></div>
+      <div class="graph__crosshair-row graph__crosshair-row--yes"><span>YES</span><strong></strong></div>
+      <div class="graph__crosshair-row graph__crosshair-row--no"><span>NO</span><strong></strong></div>
+    </div>
+  `;
+  plot.appendChild(crosshair);
+
+  // Render state — kept on the closure so hover handlers see fresh data
+  let activePeriod = "ALL";
+  let activeSeries = [];
+
+  function render(period) {
+    activePeriod = period;
+    activeSeries = getPeriodSeries(period);
+
+    // SVG path — YES drops to (1-FINAL_YES)=62 in viewBox
+    yesPathEl.setAttribute("d", pathFor(activeSeries, (s) => 1 - s.yes));
+
+    // Pulsing end-dot anchored to the actual line end-point
+    const lastYes = activeSeries[activeSeries.length - 1].yes;
+    const yesPct = Math.round(lastYes * 100);
+    if (endDotEl) {
+      endDotEl.style.top = `${(1 - lastYes) * 100}%`;
+      endDotEl.hidden = false;
+    }
+
+    // Reset the stroke gradient so the whole line reads in primary color
+    // until the user hovers (stops at 100% means the gray portion has
+    // zero width).
+    if (gradStops.length === 4) {
+      gradStops[1].setAttribute("offset", "100%");
+      gradStops[2].setAttribute("offset", "100%");
+    }
+
+    // Headline + delta tween to the period-final values; X-axis ticks
+    // re-render synchronously with the new period.
+    setHeadline(activeSeries.length - 1, true);
+    if (xAxisEl) {
+      xAxisEl.innerHTML = xLabelsFor(activeSeries, period)
+        .map((label) => `<span>${label}</span>`)
+        .join("");
+    }
+
+    // Hide crosshair on render so a stale tooltip from the previous
+    // period doesn't leak in for one frame
+    crosshair.hidden = true;
+  }
+
+  // Hover behaviour
+  plot.addEventListener("mousemove", (e) => {
+    if (!activeSeries.length) return;
+    const rect = plot.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const idx = Math.round(ratio * (activeSeries.length - 1));
+    const sample = activeSeries[idx];
+
+    const xPct = (idx / (activeSeries.length - 1)) * 100;
+    const yYesPct = (1 - sample.yes) * 100;
+    const yesPctTxt = Math.round(sample.yes * 100);
+    const noPctTxt = 100 - yesPctTxt;
+
+    // Shift the stroke-gradient hard-stops to the cursor x so the line
+    // reads in primary color up to the cursor and muted gray after it
+    // — same affordance Polymarket uses on hover.
+    if (gradStops.length === 4) {
+      const off = `${xPct}%`;
+      gradStops[1].setAttribute("offset", off);
+      gradStops[2].setAttribute("offset", off);
+    }
+
+    crosshair.style.setProperty("--x", `${xPct}%`);
+    crosshair.style.setProperty("--y-yes", `${yYesPct}%`);
+    // Anchor the tooltip on the side of the cursor with more room so it
+    // never clips at the right edge of the plot
+    crosshair.classList.toggle("graph__crosshair--right", xPct > 70);
+    crosshair.querySelector(".graph__crosshair-time").textContent =
+      formatTooltipDate(sample.t, activePeriod);
+    crosshair.querySelector(".graph__crosshair-row--yes strong").textContent = `${yesPctTxt}%`;
+    crosshair.querySelector(".graph__crosshair-row--no strong").textContent = `${noPctTxt}%`;
+    crosshair.hidden = false;
+    // Headline tracks the hovered point; delta = (hovered - first) so
+    // it reads as "where this period started → where the cursor is now".
+    setHeadline(idx, true);
+    // Hand off the pulsing affordance to the crosshair dot — two
+    // pulsing circles on the same chart would just visually compete.
+    if (endDotEl) endDotEl.hidden = true;
+  });
+
+  plot.addEventListener("mouseleave", () => {
+    crosshair.hidden = true;
+    if (endDotEl) endDotEl.hidden = false;
+    // Restore the line to fully primary-colored when the cursor leaves
+    if (gradStops.length === 4) {
+      gradStops[1].setAttribute("offset", "100%");
+      gradStops[2].setAttribute("offset", "100%");
+    }
+    // Tween headline back to period-final values.
+    setHeadline(activeSeries.length - 1, true);
+  });
+
+  // Period button wiring
+  periodBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      periodBtns.forEach((b) => b.classList.toggle("is-active", b === btn));
+      render(btn.dataset.period || "ALL");
+    });
+  });
+
+  // Initial paint with the design's default ("ALL TIME")
+  render("ALL");
+})();
+
+/* ---------- PnL graph (Your Trades tab) ----------
+   Mirrors the probability graph's behavior but quotes USD PnL instead of
+   YES probability:
+   - Random-walk series in dollar space, anchored to FINAL_PNL on the last
+     sample so the line lands exactly on the headline value.
+   - Y-axis is fixed: -$1,000 (bottom) to $8,000 (top), matching the
+     Figma's static y-axis labels.
+   - Headline value, period delta (▲/▼ change vs. start of window), and
+     X-axis ticks all re-render on period change.
+   - Hover crosshair shows the timestamp + PnL at that point. */
+(function () {
+  const MINUTE = 60 * 1000;
+  const HOUR = 60 * MINUTE;
+  const DAY = 24 * HOUR;
+
+  const periods = {
+    "1H":  { spanMs: 1 * HOUR,    points: 60,  xTicks: 6 },
+    "6H":  { spanMs: 6 * HOUR,    points: 72,  xTicks: 6 },
+    "1W":  { spanMs: 7 * DAY,     points: 168, xTicks: 7 },
+    "1M":  { spanMs: 30 * DAY,    points: 60,  xTicks: 5 },
+    "1Y":  { spanMs: 365 * DAY,   points: 52,  xTicks: 6 },
+    "ALL": { spanMs: 730 * DAY,   points: 80,  xTicks: 11 },
+  };
+
+  // Fixed dollar window the chart visualizes — matches the y-axis labels
+  // ($8k top → -$1k bottom). Series values are clamped into this range.
+  const Y_MAX = 8000;
+  const Y_MIN = -1000;
+  const Y_RANGE = Y_MAX - Y_MIN;
+
+  // Headline anchor — the master's final sample lands here so every
+  // period slice's last point matches the displayed PnL.
+  const FINAL_PNL = 5832.41;
+
+  function valueToY(v) {
+    // viewBox is 0..100 with y=0 at the top, so higher PnL = smaller y.
+    const clamped = Math.max(Y_MIN, Math.min(Y_MAX, v));
+    return ((Y_MAX - clamped) / Y_RANGE) * 100;
+  }
+
+  /* ONE master PnL series, generated once. Period buttons re-slice and
+     downsample this same series so the line shape is stable across
+     zooms. Same multi-resolution pattern as the probability graph:
+     1-min for last 24h, 30-min for older. Random walk biased upward
+     toward FINAL_PNL so the line drifts into profit, with a long tail
+     blend anchoring the end exactly at FINAL_PNL. */
+  const masterSeries = (function generateMaster() {
+    const out = [];
+    const now = Date.now();
+    const oldest = now - 730 * DAY;
+    const recentStart = now - 1 * DAY;
+    const olderStep = 30 * MINUTE;
+    const recentStep = 1 * MINUTE;
+
+    let v = -200 + Math.random() * 1700;
+    let momentum = 0;
+
+    // Drift target: how much PnL needs to gain on average per step to
+    // reach FINAL_PNL by the end. Scaled per-resolution.
+    const olderSteps = Math.ceil((recentStart - oldest) / olderStep);
+    const recentSteps = Math.ceil((now - recentStart) / recentStep);
+    const totalSteps = olderSteps + recentSteps;
+    const driftPerStep = (FINAL_PNL - v) / totalSteps;
+
+    // Low per-step σ + high momentum decay → calm walk that drifts up
+    // toward FINAL_PNL gradually rather than zig-zagging the whole way.
+    for (let t = oldest; t < recentStart; t += olderStep) {
+      momentum = momentum * 0.95 + (Math.random() - 0.5) * 5;
+      v = v + driftPerStep + momentum;
+      v = Math.max(Y_MIN + 100, Math.min(Y_MAX - 200, v));
+      out.push({ t, v });
+    }
+    for (let t = recentStart; t <= now; t += recentStep) {
+      momentum = momentum * 0.97 + (Math.random() - 0.5) * 1;
+      v = v + driftPerStep + momentum;
+      v = Math.max(Y_MIN + 100, Math.min(Y_MAX - 200, v));
+      out.push({ t, v });
+    }
+
+    const tailLen = Math.min(120, out.length);
+    const tailStart = out.length - tailLen;
+    for (let i = 0; i < tailLen; i++) {
+      const blend = i / (tailLen - 1);
+      out[tailStart + i].v =
+        out[tailStart + i].v * (1 - blend) + FINAL_PNL * blend;
+    }
+    out[out.length - 1].v = FINAL_PNL;
+    return out;
+  })();
+
+  function getPeriodSeries(period) {
+    const cfg = periods[period];
+    const cutoff = Date.now() - cfg.spanMs;
+
+    let lo = 0, hi = masterSeries.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (masterSeries[mid].t < cutoff) lo = mid + 1;
+      else hi = mid;
+    }
+    const slice = masterSeries.slice(lo);
+    if (slice.length <= cfg.points) return slice;
+
+    const out = new Array(cfg.points);
+    for (let i = 0; i < cfg.points; i++) {
+      const idx = Math.round((i * (slice.length - 1)) / (cfg.points - 1));
+      out[i] = slice[idx];
+    }
+    return out;
+  }
+
+  // Smooth cubic-bezier path through the series points.
+  function pathFor(series) {
+    if (!series.length) return "";
+    const pts = series.map((s, i) => ({
+      x: (i / (series.length - 1)) * 100,
+      y: valueToY(s.v),
+    }));
+    let d = `M${pts[0].x.toFixed(2)},${pts[0].y.toFixed(2)}`;
+    for (let i = 1; i < pts.length; i++) {
+      const p0 = pts[i - 1];
+      const p1 = pts[i];
+      const dx = (p1.x - p0.x) * 0.5;
+      d += ` C${(p0.x + dx).toFixed(2)},${p0.y.toFixed(2)} ${(p1.x - dx).toFixed(2)},${p1.y.toFixed(2)} ${p1.x.toFixed(2)},${p1.y.toFixed(2)}`;
+    }
+    return d;
+  }
+
+  function xLabelsFor(series, period) {
+    const cfg = periods[period];
+    const labels = [];
+    const fmtTime = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric", minute: "2-digit", hour12: false,
+    });
+    const fmtMonthDay = new Intl.DateTimeFormat("en-US", {
+      month: "short", day: "numeric",
+    });
+    const fmtMonthYear = new Intl.DateTimeFormat("en-US", {
+      month: "short", year: "2-digit",
+    });
+    for (let i = 0; i < cfg.xTicks; i++) {
+      const idx = Math.round((i * (series.length - 1)) / (cfg.xTicks - 1));
+      const d = new Date(series[idx].t);
+      let s;
+      if (period === "1H" || period === "6H") s = fmtTime.format(d);
+      else if (period === "1W" || period === "1M") s = fmtMonthDay.format(d).toUpperCase();
+      else s = fmtMonthYear.format(d).toUpperCase();
+      labels.push(s);
+    }
+    return labels;
+  }
+
+  function formatTooltipDate(t, period) {
+    const d = new Date(t);
+    if (period === "1H" || period === "6H") {
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short", day: "numeric", hour: "numeric", minute: "2-digit", hour12: false,
+      }).format(d);
+    }
+    if (period === "1W" || period === "1M") {
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short", day: "numeric",
+      }).format(d);
+    }
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short", year: "numeric",
+    }).format(d);
+  }
+
+  // Sign-aware "+$5,832.41" / "-$1,234.00" — preserves the leading
+  // sign so the headline reads consistently in profit and in loss.
+  function formatPnl(v) {
+    const sign = v >= 0 ? "+" : "-";
+    const abs = Math.abs(v);
+    return `${sign}$${abs.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+
+  // Delta is always shown as an absolute dollar amount; the up/down
+  // affordance is conveyed by triangle direction + color.
+  function formatDelta(v) {
+    return `$${Math.abs(v).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+
+  const plot = document.querySelector(".pnl-graph__plot");
+  const pathEl = document.querySelector(".pnl-graph__line");
+  const endDotEl = document.querySelector(".pnl-graph__end-dot");
+  const xAxisEl = document.querySelector(".pnl-graph__x-axis");
+  const valueEl = document.querySelector(".pnl-graph__value");
+  const deltaEl = document.querySelector(".pnl-graph__delta");
+  const deltaValEl = document.querySelector(".pnl-graph__delta-val");
+  const periodBtns = document.querySelectorAll(".pnl-period-btn");
+  const gradStops = document.querySelectorAll("#pnl-line-gradient stop");
+
+  if (!plot || !pathEl) return;
+
+  // Crosshair overlay — reuses the .graph__crosshair* classes (same
+  // visual treatment as the probability graph, no need to restyle).
+  // Single row labeled "PnL" since this chart only has one series.
+  const crosshair = document.createElement("div");
+  crosshair.className = "graph__crosshair";
+  crosshair.hidden = true;
+  crosshair.innerHTML = `
+    <div class="graph__crosshair-line"></div>
+    <span class="graph__crosshair-dot graph__crosshair-dot--yes"></span>
+    <div class="graph__crosshair-tooltip">
+      <div class="graph__crosshair-time"></div>
+      <div class="graph__crosshair-row graph__crosshair-row--yes"><span>PnL</span><strong></strong></div>
+    </div>
+  `;
+  plot.appendChild(crosshair);
+
+  /* Number-tween helper — same shape as the probability graph's, with
+     the same fix: track the CURRENT animated value so interrupted tweens
+     resume smoothly. Without this, rapid hover updates could briefly
+     snap the displayed value (and the --down class derived from its
+     sign) to a stale state. */
+  const tweenCurrent = new WeakMap();
+  const tweenRaf = new WeakMap();
+  function tweenNumber(el, target, formatter, onFrame, duration = 280) {
+    const prevRaf = tweenRaf.get(el);
+    if (prevRaf) cancelAnimationFrame(prevRaf);
+    const from = tweenCurrent.get(el);
+    if (from === undefined || Math.abs(from - target) < 1e-6) {
+      tweenCurrent.set(el, target);
+      el.textContent = formatter(target);
+      onFrame && onFrame(target);
+      return;
+    }
+    const start = performance.now();
+    function step(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const current = from + (target - from) * eased;
+      tweenCurrent.set(el, current);
+      el.textContent = formatter(current);
+      onFrame && onFrame(current);
+      if (t < 1) {
+        tweenRaf.set(el, requestAnimationFrame(step));
+      } else {
+        tweenCurrent.set(el, target);
+        el.textContent = formatter(target);
+        onFrame && onFrame(target);
+        tweenRaf.delete(el);
+      }
+    }
+    tweenRaf.set(el, requestAnimationFrame(step));
+  }
+
+  // Set headline value + delta to the values for sample at index `idx`.
+  // Delta is always (sample - first sample of active series), so it
+  // reads as "change since start of period" — same semantic as the
+  // probability graph's delta.
+  function setHeadline(idx) {
+    if (!activeSeries.length) return;
+    const v = activeSeries[idx].v;
+    const firstV = activeSeries[0].v;
+    const change = v - firstV;
+    if (valueEl) {
+      tweenNumber(valueEl, v, formatPnl);
+    }
+    if (deltaValEl) {
+      tweenNumber(
+        deltaValEl,
+        change,
+        formatDelta,
+        (current) => {
+          if (deltaEl) deltaEl.classList.toggle("pnl-graph__delta--down", current < 0);
+        }
+      );
+    }
+  }
+
+  let activePeriod = "ALL";
+  let activeSeries = [];
+
+  function render(period) {
+    activePeriod = period;
+    activeSeries = getPeriodSeries(period);
+
+    pathEl.setAttribute("d", pathFor(activeSeries));
+
+    const last = activeSeries[activeSeries.length - 1];
+    const first = activeSeries[0];
+    if (endDotEl) {
+      endDotEl.style.top = `${valueToY(last.v)}%`;
+      endDotEl.hidden = false;
+    }
+
+    // Reset gradient — whole line bright until hover (stops at 100%
+    // means the muted-gray portion has zero width).
+    if (gradStops.length === 4) {
+      gradStops[1].setAttribute("offset", "100%");
+      gradStops[2].setAttribute("offset", "100%");
+    }
+
+    // Headline + delta tween to period-final values.
+    setHeadline(activeSeries.length - 1);
+
+    if (xAxisEl) {
+      xAxisEl.innerHTML = xLabelsFor(activeSeries, period)
+        .map((label) => `<span>${label}</span>`)
+        .join("");
+    }
+
+    crosshair.hidden = true;
+  }
+
+  plot.addEventListener("mousemove", (e) => {
+    if (!activeSeries.length) return;
+    const rect = plot.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const idx = Math.round(ratio * (activeSeries.length - 1));
+    const sample = activeSeries[idx];
+
+    const xPct = (idx / (activeSeries.length - 1)) * 100;
+    const yPct = valueToY(sample.v);
+
+    if (gradStops.length === 4) {
+      const off = `${xPct}%`;
+      gradStops[1].setAttribute("offset", off);
+      gradStops[2].setAttribute("offset", off);
+    }
+
+    crosshair.style.setProperty("--x", `${xPct}%`);
+    crosshair.style.setProperty("--y-yes", `${yPct}%`);
+    crosshair.classList.toggle("graph__crosshair--right", xPct > 70);
+    crosshair.querySelector(".graph__crosshair-time").textContent =
+      formatTooltipDate(sample.t, activePeriod);
+    crosshair.querySelector(".graph__crosshair-row--yes strong").textContent =
+      formatPnl(sample.v);
+    crosshair.hidden = false;
+    // Headline tracks the hovered point; delta = (hovered - first).
+    setHeadline(idx);
+    if (endDotEl) endDotEl.hidden = true;
+  });
+
+  plot.addEventListener("mouseleave", () => {
+    crosshair.hidden = true;
+    if (endDotEl) endDotEl.hidden = false;
+    if (gradStops.length === 4) {
+      gradStops[1].setAttribute("offset", "100%");
+      gradStops[2].setAttribute("offset", "100%");
+    }
+    // Tween headline back to period-final values.
+    setHeadline(activeSeries.length - 1);
+  });
+
+  periodBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      periodBtns.forEach((b) => b.classList.toggle("is-active", b === btn));
+      render(btn.dataset.pnlPeriod || "ALL");
+    });
+  });
+
+  render("ALL");
+})();
+
+/* ---------- Order Book Trade Yes / Trade No toggle ---------- */
+const obToggles = document.querySelectorAll(".ob-toggle");
+const obDepthHead = document.querySelector(".orderbook .ob-cell--depth-head");
+
+obToggles.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    obToggles.forEach((b) => {
+      const active = b === btn;
+      b.classList.toggle("is-active", active);
+      b.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    // Mirror the side label in the depth column header so the data side
+    // ("TRADE YES" / "TRADE NO") follows the active toggle. Keeps the
+    // adjacent sort icon untouched.
+    if (obDepthHead) {
+      const labelSpan = obDepthHead.querySelector("span");
+      if (labelSpan) {
+        labelSpan.textContent =
+          btn.dataset.obSide === "no" ? "TRADE NO" : "TRADE YES";
+      }
+    }
+  });
+});
+
+
+})();
+
+
+/* =========================================================================
+   View swap — clicking a market card opens the detail view; the back
+   button at the top of detail returns to the list. List- and detail-
+   specific behavior (filters, leverage card, tabs, etc.) keeps working
+   inside its own view because both <main> elements stay in the DOM —
+   we just toggle the `hidden` attribute on each.
+   ========================================================================= */
+(function () {
+  const listView = document.querySelector('[data-view="list"]');
+  const detailView = document.querySelector('[data-view="detail"]');
+  const backBtn = document.querySelector('[data-detail-back]');
+  if (!listView || !detailView || !backBtn) return;
+
+  function showDetail() {
+    listView.hidden = true;
+    detailView.hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  function showList() {
+    detailView.hidden = true;
+    listView.hidden = false;
+    window.scrollTo(0, 0);
+  }
+
+  // Delegate from the list view so dynamically-rendered cards work too
+  listView.addEventListener("click", (e) => {
+    const card = e.target.closest(".market-card__inner");
+    if (!card) return;
+    // For multi-event cards (a div with role="button"), let nested real
+    // buttons (YES/NO trade, boost, bookmark) handle their own clicks.
+    if (card.tagName !== "BUTTON") {
+      const innerBtn = e.target.closest("button");
+      if (innerBtn) return;
+    }
+    showDetail();
+  });
+
+  backBtn.addEventListener("click", showList);
+})();
+
+
+/* =========================================================================
+   Live countdown timers — both list cards and the detail header.
+   - Each market's static `timeLeft` ("8d 4h left", "4mo left", "1y 2mo
+     left", etc.) is parsed into a target end-timestamp on first sight.
+   - Each timer runs its OWN setInterval started at a random subsecond
+     offset (0–999ms), so seconds across cards roll over at different
+     real moments instead of all flipping in unison.
+   - Format: "DD : HH : MM : SS" (matches the detail-header style).
+   ========================================================================= */
+(function () {
+  const SECOND = 1000;
+  const MINUTE = 60 * SECOND;
+  const HOUR = 60 * MINUTE;
+  const DAY = 24 * HOUR;
+  const MONTH = 30 * DAY; // approximation, fine for a prototype
+  const YEAR = 365 * DAY;
+
+  function parseToMs(s) {
+    if (!s) return 0;
+    let total = 0;
+    s.toLowerCase().replace(/(\d+)\s*(y|mo|d|h|m|s)\b/g, (_, n, u) => {
+      n = +n;
+      switch (u) {
+        case "y":  total += n * YEAR; break;
+        case "mo": total += n * MONTH; break;
+        case "d":  total += n * DAY; break;
+        case "h":  total += n * HOUR; break;
+        case "m":  total += n * MINUTE; break;
+        case "s":  total += n * SECOND; break;
+      }
+      return "";
+    });
+    return total;
+  }
+
+  function format(ms) {
+    if (ms <= 0) return "0D : 0H : 0M : 0S";
+    const d = Math.floor(ms / DAY);
+    const h = Math.floor((ms % DAY) / HOUR);
+    const m = Math.floor((ms % HOUR) / MINUTE);
+    const s = Math.floor((ms % MINUTE) / SECOND);
+    return `${d}D : ${h}H : ${m}M : ${s}S`;
+  }
+
+  /* Start an independent 1-second tick for one timer element, with a
+     random initial delay so its rollover phase is desynchronized from
+     other timers on the page. */
+  function startTimer(el) {
+    if (el.dataset.countdownStarted) return;
+    el.dataset.countdownStarted = "1";
+
+    const update = () => {
+      el.textContent = format(+el.dataset.countdownTo - Date.now());
+    };
+    update();
+
+    const offset = Math.floor(Math.random() * SECOND);
+    setTimeout(() => {
+      update();
+      setInterval(update, SECOND);
+    }, offset);
+  }
+
+  /* Detail header — initialize once from the static design value
+     "1048D : 8H : 47M : 54S" so the count keeps reading naturally. */
+  const detailTimer = document.querySelector(".detail-header__timer-text");
+  if (detailTimer && !detailTimer.dataset.countdownTo) {
+    const initialMs = parseToMs(detailTimer.textContent) ||
+      (1048 * DAY + 8 * HOUR + 47 * MINUTE + 54 * SECOND);
+    detailTimer.dataset.countdownTo = String(Date.now() + initialMs);
+    startTimer(detailTimer);
+  }
+
+  /* List cards — each `.market-card__time` initially holds e.g. "8d 4h
+     left"; convert to a target timestamp the first time we see it.
+     The grid re-renders on filter / search / sort, so we observe both
+     supported and unsupported lists for new cards. */
+  function applyCardCountdowns(root) {
+    const now = Date.now();
+    (root || document).querySelectorAll(
+      ".market-card__time:not([data-countdown-to])"
+    ).forEach((el) => {
+      const ms = parseToMs(el.textContent);
+      if (ms > 0) {
+        // Per-card jitter (0–59m 59s) so each card's starting M:S values
+        // differ from one another instead of all reading 0M : 0S.
+        const jitter = Math.floor(Math.random() * 3600) * SECOND;
+        el.dataset.countdownTo = String(now + ms + jitter);
+        startTimer(el);
+      }
+    });
+  }
+
+  applyCardCountdowns();
+
+  ["market-grid", "market-grid-unsupported"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      new MutationObserver(() => applyCardCountdowns(el)).observe(el, {
+        childList: true,
+      });
+    }
+  });
+})();
+
+
+/* =========================================================================
+   Custom overlay scrollbar for the detail tabs panel.
+   The native scrollbar is hidden via CSS (no gutter reserved) so the
+   panel content uses the full width of the column. This script:
+   - Appends a <div class="detail-tabs__thumb"> into each panel.
+   - On scroll, sizes & positions the thumb to mirror the scroll position
+     and translates it with the scroll so it appears pinned in the
+     viewport (since it's an absolutely-positioned child of the scroll
+     container, it would otherwise scroll away with the content).
+   - Adds `is-visible` to the thumb during active scroll; CSS fades it in
+     on hover too.
+   - Skips panels whose content fits without overflow.
+   ========================================================================= */
+(function () {
+  const panels = document.querySelectorAll(".detail-tabs__panel");
+  if (!panels.length) return;
+
+  panels.forEach((panel) => {
+    const thumb = document.createElement("div");
+    thumb.className = "detail-tabs__thumb";
+    thumb.hidden = true;
+    panel.appendChild(thumb);
+
+    let hideTimer;
+    function update() {
+      const { scrollTop, scrollHeight, clientHeight } = panel;
+      if (scrollHeight <= clientHeight + 1) {
+        thumb.hidden = true;
+        return;
+      }
+      thumb.hidden = false;
+      const visibleRatio = clientHeight / scrollHeight;
+      const thumbHeight = Math.max(24, clientHeight * visibleRatio);
+      const maxThumbTop = clientHeight - thumbHeight;
+      const progress = scrollTop / (scrollHeight - clientHeight);
+      const visualTop = progress * maxThumbTop;
+      thumb.style.height = `${thumbHeight}px`;
+      // translateY keeps the thumb visually pinned even though it lives
+      // inside the scrolling element (absolute positioning is relative
+      // to the scroll origin, which moves with content).
+      thumb.style.transform = `translateY(${scrollTop + visualTop}px)`;
+    }
+
+    function poke() {
+      thumb.classList.add("is-visible");
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => thumb.classList.remove("is-visible"), 800);
+    }
+
+    panel.addEventListener("scroll", () => {
+      update();
+      poke();
+    });
+
+    // Recalculate when content size changes (e.g. after period-btn render
+    // swaps the graph or after a tab content re-layout).
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(update).observe(panel);
+    }
+
+    update();
+  });
+})();
+
+
+/* =========================================================================
+   Order book scroll geometry.
+   - Sizes ask & bid rows so exactly 4 + spread + 4 fit the visible area.
+     The user scrolls to reach the other 4 of each side (top of asks,
+     bottom of bids).
+   - Centers the initial scroll on the LAST/SPREAD divider so the user
+     opens the tab looking at the inside of the book.
+   - Recomputes on resize and whenever the orderbook tab becomes visible
+     (its panel goes from `hidden` → not, which changes its measurable
+     height from 0 to real).
+   ========================================================================= */
+(function () {
+  const section = document.querySelector("[data-ob-rows]");
+  const spread = document.querySelector("[data-ob-spread]");
+  if (!section || !spread) return;
+
+  // 4 asks above the spread + 4 bids below it = 8 ask/bid slots
+  // sharing (clientHeight - spreadHeight). Hardcoded because the
+  // visible-rows count is design-fixed, not data-driven.
+  const VISIBLE_ROWS_PER_SIDE = 4;
+  const VISIBLE_ROWS_TOTAL = VISIBLE_ROWS_PER_SIDE * 2;
+
+  // Count the ask rows once — the spread's natural-flow position inside
+  // the section is exactly (# of asks above) × rowH, since asks are the
+  // only siblings before the spread in DOM order.
+  const askRows = section.querySelectorAll(".ob-row--ask");
+
+  // `smooth` = animate the scroll. We pass `true` only from the manual
+  // recenter button so initial paints / resize / tab-show events still
+  // snap instantly (animating those would feel laggy on first reveal).
+  function layout(smooth = false) {
+    const h = section.clientHeight;
+    if (h === 0) return; // tab is hidden, skip — we'll re-run when shown
+    const spreadH = spread.offsetHeight;
+    const rowH = (h - spreadH) / VISIBLE_ROWS_TOTAL;
+    if (rowH > 0) {
+      section.style.setProperty("--ob-row-h", `${rowH}px`);
+      // Center the spread in the viewport. We can't read the spread's
+      // position from the DOM directly: it's `position: sticky` with
+      // both top:0 and bottom:0, so at scrollTop=0 it's sticky-clamped
+      // to the viewport bottom — getBoundingClientRect would return
+      // the *stuck* position, not the natural flow position. offsetTop
+      // also can't be used straight (it's measured from the closest
+      // positioned ancestor, .detail-tabs__panel, not from this
+      // section). Instead, compute the natural top deterministically:
+      // (# of asks above) × rowH. Then back off 4 rows to center.
+      const naturalSpreadTop = askRows.length * rowH;
+      const target = Math.max(
+        0,
+        naturalSpreadTop - rowH * VISIBLE_ROWS_PER_SIDE
+      );
+      if (smooth) {
+        section.scrollTo({ top: target, behavior: "smooth" });
+      } else {
+        section.scrollTop = target;
+      }
+    }
+  }
+
+  layout();
+
+  if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(layout).observe(section);
+  }
+
+  // The orderbook panel starts hidden (not the active tab). When the
+  // user clicks the Order Book detail-tab, the panel's `hidden` flips
+  // off and clientHeight goes from 0 to real — re-run layout then.
+  const panel = section.closest(".detail-tabs__panel");
+  if (panel && typeof MutationObserver !== "undefined") {
+    new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.attributeName === "hidden" && !panel.hidden) {
+          layout();
+        }
+      }
+    }).observe(panel, { attributes: true, attributeFilter: ["hidden"] });
+  }
+
+  // Recenter button — the "TRADE YES ↕" header cell doubles as a reset
+  // affordance; clicking it scrolls the spread back to the center of
+  // the viewport (same math as initial layout).
+  const recenterBtn = document.querySelector("[data-ob-recenter]");
+  if (recenterBtn) {
+    recenterBtn.addEventListener("click", () => layout(true));
+    recenterBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        layout(true);
+      }
+    });
+  }
+})();
