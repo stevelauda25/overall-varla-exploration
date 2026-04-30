@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="market.css" />
   </head>
   <body>
-    <main class="page">
+    <main class="page" data-view="list">
       <section class="markets" aria-label="Markets">
         <!-- Sticky-top group: toolbar + hairline divider stay pinned while
              only the market grid scrolls beneath. -->
@@ -373,6 +373,1210 @@
         </div>
       </li>
     </template>
+
+    <main class="page page--detail" data-view="detail" hidden>
+      <button type="button" class="detail-back" data-detail-back aria-label="Back to markets">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M9.5 3 5 8l4.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span>Back to markets</span>
+      </button>
+      <div class="detail">
+        <!-- =====================================================================
+             LEFT COLUMN — market header, side stats, tabs, pool info & graph
+             ===================================================================== -->
+        <div class="detail__left">
+          <!-- HEADER: market title + countdown timer -->
+          <header class="detail-header">
+            <div class="detail-header__title">
+              <img
+                class="detail-header__thumb"
+                src="assets/market-thumb.png"
+                alt=""
+              />
+              <div class="detail-header__title-text">
+                <h1 class="detail-header__heading">
+                  Will the Fed cut rates at the next meeting?
+                </h1>
+                <a class="detail-header__link" href="#">View market</a>
+              </div>
+            </div>
+
+            <div class="detail-header__timer">
+              <div class="detail-header__timer-row">
+                <svg class="detail-header__timer-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="13" r="8" stroke="currentColor" stroke-width="1.5" />
+                  <path d="M12 9v4l2.5 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                  <path d="M9 3h6M12 3v3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+                <span class="detail-header__timer-text">1048D : 8H : 47M : 54S</span>
+              </div>
+              <!-- Half-filled progress bar: a brand-blue fill on the left and
+                   an empty spacer on the right. Mirrors the Figma 50/50 split
+                   for the 1048-day countdown. -->
+              <div class="detail-header__progress">
+                <div class="detail-header__progress-fill"></div>
+                <div class="detail-header__progress-spacer"></div>
+              </div>
+            </div>
+          </header>
+
+          <!-- SIDE STATS — YES / NO bias bars paired with Price + Volume cards -->
+          <div class="detail-side-stats">
+            <div class="detail-side-stats__row">
+              <div class="bias-bar">
+                <div class="bias-bar__inner">
+                  <span class="bias-bar__chip bias-bar__chip--yes">YES • 32%</span>
+                  <span class="bias-bar__rest"></span>
+                </div>
+              </div>
+              <div class="overview-pair">
+                <div class="overview-cell">
+                  <span class="overview-cell__label">Price</span>
+                  <span class="overview-cell__value">32¢</span>
+                </div>
+                <div class="overview-cell">
+                  <span class="overview-cell__label">Volume</span>
+                  <span class="overview-cell__value">$24,500.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-side-stats__row">
+              <div class="bias-bar">
+                <div class="bias-bar__inner">
+                  <span class="bias-bar__chip bias-bar__chip--no bias-bar__chip--no-wide">NO • 68%</span>
+                  <span class="bias-bar__rest"></span>
+                </div>
+              </div>
+              <div class="overview-pair">
+                <div class="overview-cell">
+                  <span class="overview-cell__label">Price</span>
+                  <span class="overview-cell__value">68¢</span>
+                </div>
+                <div class="overview-cell">
+                  <span class="overview-cell__label">Volume</span>
+                  <span class="overview-cell__value">$24,500.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TABS + content (Market Overview / Order Book / Your Trades) -->
+          <section class="detail-tabs">
+            <nav class="detail-tabs__bar" role="tablist">
+              <button type="button" class="detail-tab is-active" role="tab" aria-selected="true" data-detail-tab="overview">
+                Market Overview
+              </button>
+              <button type="button" class="detail-tab" role="tab" aria-selected="false" data-detail-tab="orderbook">
+                Order Book
+              </button>
+              <button type="button" class="detail-tab" role="tab" aria-selected="false" data-detail-tab="trades">
+                Your Trades
+              </button>
+            </nav>
+
+            <!-- Active panel — Market Overview -->
+            <div class="detail-tabs__panel" data-detail-panel="overview">
+              <!-- Two rows of three cells each, separated by hairline borders -->
+              <div class="overview-grid">
+                <div class="overview-cell overview-cell--lg">
+                  <span class="overview-cell__label">Max Leverage</span>
+                  <span class="overview-cell__value">2×</span>
+                </div>
+                <div class="overview-cell overview-cell--lg">
+                  <span class="overview-cell__label">Volume</span>
+                  <span class="overview-cell__value">
+                    $156,283<span class="overview-cell__value--muted">.75</span>
+                  </span>
+                </div>
+                <div class="overview-cell overview-cell--lg">
+                  <span class="overview-cell__label">Pool Maturity Date</span>
+                  <span class="overview-cell__value">Jan 1, 2026</span>
+                </div>
+              </div>
+              <div class="overview-grid">
+                <div class="overview-cell overview-cell--lg">
+                  <span class="overview-cell__label">Deposited Shares</span>
+                  <span class="overview-cell__value">12,340</span>
+                </div>
+                <div class="overview-cell overview-cell--lg">
+                  <span class="overview-cell__label">Max LTV</span>
+                  <span class="overview-cell__value">50.0%</span>
+                </div>
+                <div class="overview-cell overview-cell--lg">
+                  <span class="overview-cell__label">Liquidation LTV</span>
+                  <span class="overview-cell__value">77.0%</span>
+                </div>
+              </div>
+
+              <!-- Pool description block -->
+              <div class="pool-desc">
+                <span class="pool-desc__kicker">POOL DESCRIPTION</span>
+                <div class="pool-desc__body">
+                  <p>
+                    This pool will resolve to "Yes" if the named individual wins
+                    and accepts the 2028 nomination of the Democratic Party for
+                    U.S. president. Otherwise, this market will resolve to "No".
+                  </p>
+                  <p>
+                    The resolution source for this market will be a consensus of
+                    official Democratic Party sources.
+                  </p>
+                  <p>
+                    Any replacement of the democratic nominee before election day
+                    will not change the resolution of the market.
+                  </p>
+                  <p>Created At: Jul 12, 2025, 1:15 AM GMT+7</p>
+                </div>
+                <p class="pool-desc__note">
+                  This pool uses this market's outcome shares as collateral.
+                </p>
+              </div>
+
+              <!-- Probability graph -->
+              <div class="graph">
+                <div class="graph__head">
+                  <div class="graph__values">
+                    <h2 class="graph__chance">38% Chance</h2>
+                    <span class="graph__delta">
+                      <svg class="graph__delta-tri" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                        <path d="M6 2 11 10 1 10Z" fill="currentColor" />
+                      </svg>
+                      <span class="graph__delta-val">5%</span>
+                    </span>
+                  </div>
+                  <div class="graph__periods" role="tablist">
+                    <button type="button" class="period-btn" data-period="1H">1H</button>
+                    <button type="button" class="period-btn" data-period="6H">6H</button>
+                    <button type="button" class="period-btn" data-period="1W">1W</button>
+                    <button type="button" class="period-btn" data-period="1M">1M</button>
+                    <button type="button" class="period-btn" data-period="1Y">1Y</button>
+                    <button type="button" class="period-btn is-active" data-period="ALL">ALL TIME</button>
+                  </div>
+                </div>
+
+                <!-- Chart body — plot on the left (grid + curves + value badges)
+                     with the y-axis label column on the right, mirroring Figma. -->
+                <div class="graph__chart">
+                  <div class="graph__plot">
+                    <!-- Horizontal grid lines -->
+                    <div class="graph__grid" aria-hidden="true">
+                      <div class="graph__grid-line"></div>
+                      <div class="graph__grid-line"></div>
+                      <div class="graph__grid-line"></div>
+                      <div class="graph__grid-line"></div>
+                      <div class="graph__grid-line"></div>
+                      <div class="graph__grid-line"></div>
+                    </div>
+
+                    <!-- Single YES line (Polymarket convention — NO is just
+                         1 - YES so a second line is redundant). The stroke
+                         uses a horizontal gradient with two hard stops; JS
+                         shifts those stops on hover so the segment to the
+                         right of the cursor fades to muted gray. -->
+                    <svg class="graph__svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                      <defs>
+                        <linearGradient id="graph-line-gradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
+                          <stop offset="0%"   style="stop-color: var(--brand-blue-300, #7aa9ff)" />
+                          <stop offset="100%" style="stop-color: var(--brand-blue-300, #7aa9ff)" />
+                          <!-- Right-of-cursor portion: foreground-primary
+                               with alpha-white-800 (10% white) layered on
+                               top, flattened via color-mix. Gives a dark,
+                               slightly bluish gray that reads as muted
+                               against the page background. -->
+                          <stop offset="100%" style="stop-color: color-mix(in srgb, var(--foreground-primary, #070e1d) 90%, #ffffff 10%)" />
+                          <stop offset="100%" style="stop-color: color-mix(in srgb, var(--foreground-primary, #070e1d) 90%, #ffffff 10%)" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        class="graph__line graph__line--yes"
+                        d="M0,45 C8,48 14,40 20,42 C28,46 34,52 42,48 C50,45 56,54 64,58 C72,62 80,60 88,62 C94,63 98,62 100,62"
+                        fill="none"
+                        stroke="url(#graph-line-gradient)"
+                        stroke-width="2"
+                        vector-effect="non-scaling-stroke"
+                      />
+                    </svg>
+
+                    <!-- Pulsing dot at the rightmost point of the line.
+                         JS positions it on every render so it tracks the
+                         line's last sample. Hidden while the user is
+                         hovering — the crosshair dot takes over instead. -->
+                    <span class="graph__end-dot" aria-hidden="true"></span>
+                  </div>
+
+                  <ul class="graph__y-axis" aria-hidden="true">
+                    <li>100%</li>
+                    <li>80%</li>
+                    <li>60%</li>
+                    <li>40%</li>
+                    <li>20%</li>
+                    <li>0%</li>
+                  </ul>
+                </div>
+
+                <div class="graph__x-axis">
+                  <span>AUG 21</span>
+                  <span>AUG 22</span>
+                  <span>AUG 23</span>
+                  <span>AUG 24</span>
+                  <span>AUG 25</span>
+                  <span>AUG 26</span>
+                  <span>AUG 27</span>
+                  <span>AUG 28</span>
+                  <span>AUG 29</span>
+                  <span>AUG 30</span>
+                  <span>SEP 1</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Book tab — Figma node 14629:85545 -->
+            <div class="detail-tabs__panel" data-detail-panel="orderbook" hidden>
+              <div class="orderbook">
+                <header class="orderbook__head">
+                  <h2 class="orderbook__title">Order book</h2>
+                  <div class="orderbook__actions">
+                    <div class="orderbook__toggle" role="tablist">
+                      <button type="button" class="ob-toggle is-active" role="tab" aria-selected="true" data-ob-side="yes">
+                        Trade Yes
+                      </button>
+                      <button type="button" class="ob-toggle" role="tab" aria-selected="false" data-ob-side="no">
+                        Trade No
+                      </button>
+                    </div>
+                    <button type="button" class="orderbook__refresh" aria-label="Refresh order book">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M13.3 3v3h-3M2.7 13v-3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M12.6 6A5 5 0 0 0 4.2 4.4M3.4 10A5 5 0 0 0 11.8 11.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                      </svg>
+                    </button>
+                  </div>
+                </header>
+
+                <!-- Table — 4-column grid: depth | price | shares | total.
+                     Each row sets `--depth` so the absolutely-positioned bar
+                     in `::before` knows how wide to draw the depth fill. -->
+                <div class="orderbook__table">
+                  <!-- Asks header row -->
+                  <div class="ob-row ob-row--head">
+                    <div class="ob-cell ob-cell--depth-head ob-cell--recenter" role="button" tabindex="0" aria-label="Recenter order book on spread" data-ob-recenter>
+                      <span>TRADE YES</span>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                        <path d="M6 1.5v9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                        <path d="M3.5 4 6 1.5 8.5 4M3.5 8 6 10.5 8.5 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </div>
+                    <div class="ob-cell ob-cell--head">PRICE</div>
+                    <div class="ob-cell ob-cell--head">SHARES</div>
+                    <div class="ob-cell ob-cell--head">TOTAL</div>
+                  </div>
+
+                  <!-- Single scroll area for everything below the column
+                       header: 8 asks + LAST/SPREAD divider + 8 bids. The
+                       spread row keeps its natural (smaller) height; ask
+                       and bid rows share the remaining viewport space so
+                       4 asks + spread + 4 bids fit by default, with the
+                       other 4 of each side reachable via scroll. JS sets
+                       the initial scrollTop so the spread is centered. -->
+                  <div class="ob-section ob-section--rows" data-ob-rows>
+                    <!-- Asks (sell side) — red fills, narrowing toward the spread -->
+                    <div class="ob-row ob-row--ask" style="--depth: 380px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">48¢</div>
+                      <div class="ob-cell">31,040.50</div>
+                      <div class="ob-cell">$14,899.44</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 362px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">47¢</div>
+                      <div class="ob-cell">29,340.10</div>
+                      <div class="ob-cell">$13,789.85</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 344px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">46¢</div>
+                      <div class="ob-cell">27,639.70</div>
+                      <div class="ob-cell">$12,714.26</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 326px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">45¢</div>
+                      <div class="ob-cell">25,939.30</div>
+                      <div class="ob-cell">$11,672.68</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 308px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">44¢</div>
+                      <div class="ob-cell">24,238.90</div>
+                      <div class="ob-cell">$10,665.12</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 290px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">43¢</div>
+                      <div class="ob-cell">22,538.50</div>
+                      <div class="ob-cell">$9,691.56</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 272px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">42¢</div>
+                      <div class="ob-cell">20,838.10</div>
+                      <div class="ob-cell">$8,752.00</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 254px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">41¢</div>
+                      <div class="ob-cell">19,137.70</div>
+                      <div class="ob-cell">$7,846.46</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 236px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">40¢</div>
+                      <div class="ob-cell">17,437.30</div>
+                      <div class="ob-cell">$6,974.92</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 218px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">39¢</div>
+                      <div class="ob-cell">15,736.90</div>
+                      <div class="ob-cell">$6,137.39</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 200px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">38¢</div>
+                      <div class="ob-cell">14,036.50</div>
+                      <div class="ob-cell">$5,333.87</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 182px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">37¢</div>
+                      <div class="ob-cell">12,336.10</div>
+                      <div class="ob-cell">$4,564.36</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 92px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">36¢</div>
+                      <div class="ob-cell">8,124.71</div>
+                      <div class="ob-cell">$2,924.90</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 84px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">35¢</div>
+                      <div class="ob-cell">19,503.42</div>
+                      <div class="ob-cell">$6,826.20</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 80px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">34¢</div>
+                      <div class="ob-cell">37,841.05</div>
+                      <div class="ob-cell">$12,865.96</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 78px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">33¢</div>
+                      <div class="ob-cell">52,308.99</div>
+                      <div class="ob-cell">$17,261.97</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 74px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">32¢</div>
+                      <div class="ob-cell">23,666.04</div>
+                      <div class="ob-cell">$74,751.28</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 64px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">31¢</div>
+                      <div class="ob-cell">79,511.86</div>
+                      <div class="ob-cell">$67,178.15</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 34px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">30¢</div>
+                      <div class="ob-cell">128,229.14</div>
+                      <div class="ob-cell">$42,529.47</div>
+                    </div>
+                    <div class="ob-row ob-row--ask" style="--depth: 16px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">29¢</div>
+                      <div class="ob-cell">14,002.53</div>
+                      <div class="ob-cell">$4,060.73</div>
+                    </div>
+
+                    <!-- Spread separator — LAST + SPREAD info -->
+                    <div class="ob-row ob-row--spread" data-ob-spread>
+                      <div class="ob-cell ob-cell--depth-head">LAST: 28¢</div>
+                      <div class="ob-cell ob-cell--head">SPREAD: 1¢</div>
+                      <div class="ob-cell ob-cell--head"></div>
+                      <div class="ob-cell ob-cell--head"></div>
+                    </div>
+
+                    <!-- Bids (buy side) — green fills, widening away from the spread -->
+                    <div class="ob-row ob-row--bid" style="--depth: 171px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">28¢</div>
+                      <div class="ob-cell">132,037.24</div>
+                      <div class="ob-cell">$36,970.43</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 257px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">27¢</div>
+                      <div class="ob-cell">237,499.12</div>
+                      <div class="ob-cell">$101,095.19</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 419px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">26¢</div>
+                      <div class="ob-cell">305,605.50</div>
+                      <div class="ob-cell">$180,552.62</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 533px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">25¢</div>
+                      <div class="ob-cell">494,368.32</div>
+                      <div class="ob-cell">$304,144.70</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 612px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">24¢</div>
+                      <div class="ob-cell">681,492.18</div>
+                      <div class="ob-cell">$163,558.12</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 670px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">23¢</div>
+                      <div class="ob-cell">812,344.55</div>
+                      <div class="ob-cell">$186,839.25</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 720px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">22¢</div>
+                      <div class="ob-cell">935,108.04</div>
+                      <div class="ob-cell">$205,723.77</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 780px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">21¢</div>
+                      <div class="ob-cell">1,058,279.41</div>
+                      <div class="ob-cell">$222,238.68</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 380px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">20¢</div>
+                      <div class="ob-cell">1,145,000.21</div>
+                      <div class="ob-cell">$229,000.04</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 371px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">19¢</div>
+                      <div class="ob-cell">1,177,500.21</div>
+                      <div class="ob-cell">$223,725.04</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 362px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">18¢</div>
+                      <div class="ob-cell">1,210,000.21</div>
+                      <div class="ob-cell">$217,800.04</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 353px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">17¢</div>
+                      <div class="ob-cell">1,242,500.21</div>
+                      <div class="ob-cell">$211,225.04</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 344px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">16¢</div>
+                      <div class="ob-cell">1,275,000.21</div>
+                      <div class="ob-cell">$204,000.03</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 335px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">15¢</div>
+                      <div class="ob-cell">1,307,500.21</div>
+                      <div class="ob-cell">$196,125.03</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 326px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">14¢</div>
+                      <div class="ob-cell">1,340,000.21</div>
+                      <div class="ob-cell">$187,600.03</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 317px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">13¢</div>
+                      <div class="ob-cell">1,372,500.21</div>
+                      <div class="ob-cell">$178,425.03</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 308px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">12¢</div>
+                      <div class="ob-cell">1,405,000.21</div>
+                      <div class="ob-cell">$168,600.03</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 299px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">11¢</div>
+                      <div class="ob-cell">1,437,500.21</div>
+                      <div class="ob-cell">$158,125.02</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 290px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">10¢</div>
+                      <div class="ob-cell">1,470,000.21</div>
+                      <div class="ob-cell">$147,000.02</div>
+                    </div>
+                    <div class="ob-row ob-row--bid" style="--depth: 281px">
+                      <div class="ob-cell"></div>
+                      <div class="ob-cell ob-cell--price">9¢</div>
+                      <div class="ob-cell">1,502,500.21</div>
+                      <div class="ob-cell">$135,225.02</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- Your Trades tab — Figma node 15462:179013 -->
+            <div class="detail-tabs__panel" data-detail-panel="trades" hidden>
+              <div class="your-trades">
+                <!-- Top stat grid — 2 rows × 4 cells, left-aligned -->
+                <div class="overview-grid yt-grid">
+                  <div class="overview-cell overview-cell--lg yt-cell">
+                    <span class="overview-cell__label">Side</span>
+                    <span class="yt-side-pill">YES</span>
+                  </div>
+                  <div class="overview-cell overview-cell--lg yt-cell">
+                    <span class="overview-cell__label">Position Value</span>
+                    <span class="overview-cell__value">$156,283.75</span>
+                  </div>
+                  <div class="overview-cell overview-cell--lg yt-cell">
+                    <span class="overview-cell__label">PnL</span>
+                    <span class="overview-cell__value yt-pos">+$5,832,41</span>
+                  </div>
+                  <div class="overview-cell overview-cell--lg yt-cell">
+                    <span class="overview-cell__label">Net Shares</span>
+                    <span class="overview-cell__value">24,643.01</span>
+                  </div>
+                </div>
+                <div class="overview-grid yt-grid">
+                  <div class="overview-cell overview-cell--lg yt-cell">
+                    <span class="overview-cell__label">Current Price</span>
+                    <span class="overview-cell__value">72¢</span>
+                  </div>
+                  <div class="overview-cell overview-cell--lg yt-cell">
+                    <span class="overview-cell__label">Your Leverage</span>
+                    <span class="overview-cell__value">2.4×</span>
+                  </div>
+                  <div class="overview-cell overview-cell--lg yt-cell">
+                    <span class="overview-cell__label">Avg. Entry Price</span>
+                    <span class="overview-cell__value">68¢</span>
+                  </div>
+                  <div class="overview-cell overview-cell--lg yt-cell">
+                    <span class="overview-cell__label">Liquidation</span>
+                    <span class="overview-cell__value">0.00</span>
+                  </div>
+                </div>
+
+                <!-- PnL graph -->
+                <div class="pnl-graph">
+                  <span class="pnl-graph__label">PnL</span>
+                  <div class="pnl-graph__head">
+                    <div class="pnl-graph__values">
+                      <span class="pnl-graph__value">+$5,832.41</span>
+                      <span class="pnl-graph__delta">
+                        <svg class="pnl-graph__delta-tri" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                          <path d="M6 2 11 10 1 10Z" fill="currentColor" />
+                        </svg>
+                        <span class="pnl-graph__delta-val">$563.65</span>
+                      </span>
+                    </div>
+                    <div class="pnl-graph__periods" role="tablist">
+                      <button type="button" class="pnl-period-btn" data-pnl-period="1H">1H</button>
+                      <button type="button" class="pnl-period-btn" data-pnl-period="6H">6H</button>
+                      <button type="button" class="pnl-period-btn" data-pnl-period="1W">1W</button>
+                      <button type="button" class="pnl-period-btn" data-pnl-period="1M">1M</button>
+                      <button type="button" class="pnl-period-btn" data-pnl-period="1Y">1Y</button>
+                      <button type="button" class="pnl-period-btn is-active" data-pnl-period="ALL">ALL TIME</button>
+                    </div>
+                  </div>
+
+                  <div class="pnl-graph__chart">
+                    <div class="pnl-graph__plot">
+                      <div class="pnl-graph__grid" aria-hidden="true">
+                        <div class="pnl-graph__grid-line"></div>
+                        <div class="pnl-graph__grid-line"></div>
+                        <div class="pnl-graph__grid-line"></div>
+                        <div class="pnl-graph__grid-line"></div>
+                        <div class="pnl-graph__grid-line"></div>
+                        <div class="pnl-graph__grid-line"></div>
+                      </div>
+                      <!-- Same gradient affordance as the Market Overview line:
+                           stops 0-1 = bright blue (left of cursor), 2-3 = muted
+                           gray (right of cursor). All sit at 100% by default
+                           so the entire stroke renders bright; JS shifts stops
+                           1 and 2 to the cursor x on hover. -->
+                      <svg class="pnl-graph__svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                        <defs>
+                          <linearGradient id="pnl-line-gradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="0">
+                            <stop offset="0%"   style="stop-color: var(--brand-blue-300, #7aa9ff)" />
+                            <stop offset="100%" style="stop-color: var(--brand-blue-300, #7aa9ff)" />
+                            <stop offset="100%" style="stop-color: color-mix(in srgb, var(--foreground-primary, #070e1d) 90%, #ffffff 10%)" />
+                            <stop offset="100%" style="stop-color: color-mix(in srgb, var(--foreground-primary, #070e1d) 90%, #ffffff 10%)" />
+                          </linearGradient>
+                        </defs>
+                        <path
+                          class="pnl-graph__line"
+                          d=""
+                          fill="none"
+                          stroke="url(#pnl-line-gradient)"
+                          stroke-width="2"
+                          vector-effect="non-scaling-stroke"
+                        />
+                      </svg>
+                      <span class="pnl-graph__end-dot" aria-hidden="true"></span>
+                    </div>
+                    <ul class="pnl-graph__y-axis" aria-hidden="true">
+                      <li>$8,000</li>
+                      <li>$6,000</li>
+                      <li>$4,000</li>
+                      <li>$2,000</li>
+                      <li>0</li>
+                      <li>-$1,000</li>
+                    </ul>
+                  </div>
+                  <div class="pnl-graph__x-axis"></div>
+                </div>
+
+                <!-- Trade activity table -->
+                <div class="trade-activity">
+                  <header class="trade-activity__head">
+                    <h3 class="trade-activity__title">Trade activity</h3>
+                    <button type="button" class="trade-activity__refresh" aria-label="Refresh trade activity">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <path d="M13.3 3v3h-3M2.7 13v-3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M12.6 6A5 5 0 0 0 4.2 4.4M3.4 10A5 5 0 0 0 11.8 11.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                      </svg>
+                    </button>
+                  </header>
+                  <div class="trade-activity__table" role="table">
+                    <div class="ta-row ta-row--head" role="row">
+                      <div class="ta-cell ta-cell--head" role="columnheader">OPENED AT</div>
+                      <div class="ta-cell ta-cell--head" role="columnheader">ENTRY</div>
+                      <div class="ta-cell ta-cell--head" role="columnheader">LEVERAGE</div>
+                      <div class="ta-cell ta-cell--head" role="columnheader">SHARES</div>
+                      <div class="ta-cell ta-cell--head" role="columnheader">TRADE AMOUNT</div>
+                    </div>
+                    <div class="ta-row" role="row">
+                      <div class="ta-cell" role="cell">
+                        <svg class="ta-cal" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                          <rect x="2" y="3" width="10" height="9" rx="1.2" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M2 6h10" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M5 2v2M9 2v2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                        </svg>
+                        <span class="ta-date">DEC 24,</span>
+                        <span class="ta-time">14:30</span>
+                      </div>
+                      <div class="ta-cell" role="cell">28¢</div>
+                      <div class="ta-cell" role="cell">2.0x</div>
+                      <div class="ta-cell" role="cell">2,411</div>
+                      <div class="ta-cell" role="cell">$2,650.24</div>
+                    </div>
+                    <div class="ta-row" role="row">
+                      <div class="ta-cell" role="cell">
+                        <svg class="ta-cal" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                          <rect x="2" y="3" width="10" height="9" rx="1.2" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M2 6h10" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M5 2v2M9 2v2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                        </svg>
+                        <span class="ta-date">JAN 01,</span>
+                        <span class="ta-time">14:30</span>
+                      </div>
+                      <div class="ta-cell" role="cell">64¢</div>
+                      <div class="ta-cell" role="cell">1.8x</div>
+                      <div class="ta-cell" role="cell">1,688</div>
+                      <div class="ta-cell" role="cell">$2,650.24</div>
+                    </div>
+                    <div class="ta-row" role="row">
+                      <div class="ta-cell" role="cell">
+                        <svg class="ta-cal" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                          <rect x="2" y="3" width="10" height="9" rx="1.2" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M2 6h10" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M5 2v2M9 2v2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                        </svg>
+                        <span class="ta-date">OCT 23,</span>
+                        <span class="ta-time">14:30</span>
+                      </div>
+                      <div class="ta-cell" role="cell">36¢</div>
+                      <div class="ta-cell" role="cell">1.3x</div>
+                      <div class="ta-cell" role="cell">1,778</div>
+                      <div class="ta-cell" role="cell">$2,650.24</div>
+                    </div>
+                    <div class="ta-row" role="row">
+                      <div class="ta-cell" role="cell">
+                        <svg class="ta-cal" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                          <rect x="2" y="3" width="10" height="9" rx="1.2" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M2 6h10" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M5 2v2M9 2v2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                        </svg>
+                        <span class="ta-date">OCT 23,</span>
+                        <span class="ta-time">14:30</span>
+                      </div>
+                      <div class="ta-cell" role="cell">71¢</div>
+                      <div class="ta-cell" role="cell">1.6x</div>
+                      <div class="ta-cell" role="cell">985</div>
+                      <div class="ta-cell" role="cell">$2,650.24</div>
+                    </div>
+                    <div class="ta-row" role="row">
+                      <div class="ta-cell" role="cell">
+                        <svg class="ta-cal" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                          <rect x="2" y="3" width="10" height="9" rx="1.2" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M2 6h10" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M5 2v2M9 2v2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                        </svg>
+                        <span class="ta-date">OCT 23,</span>
+                        <span class="ta-time">14:30</span>
+                      </div>
+                      <div class="ta-cell" role="cell">30¢</div>
+                      <div class="ta-cell" role="cell">1.1x</div>
+                      <div class="ta-cell" role="cell">3,000</div>
+                      <div class="ta-cell" role="cell">$2,650.24</div>
+                    </div>
+                    <div class="ta-row" role="row">
+                      <div class="ta-cell" role="cell">
+                        <svg class="ta-cal" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                          <rect x="2" y="3" width="10" height="9" rx="1.2" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M2 6h10" stroke="currentColor" stroke-width="1.1" />
+                          <path d="M5 2v2M9 2v2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                        </svg>
+                        <span class="ta-date">OCT 23,</span>
+                        <span class="ta-time">14:30</span>
+                      </div>
+                      <div class="ta-cell" role="cell">30¢</div>
+                      <div class="ta-cell" role="cell">1.1x</div>
+                      <div class="ta-cell" role="cell">3,000</div>
+                      <div class="ta-cell" role="cell">$2,650.24</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- =====================================================================
+             RIGHT COLUMN — Mode dropdown + Leverage card (reused verbatim from
+             the leverage-position exploration). The leverage card markup, styles,
+             and JS all come from ../leverage-position/.
+             ===================================================================== -->
+        <aside class="detail__right">
+          <!-- Mode selector card — visual only -->
+          <button type="button" class="mode-card">
+            <span class="mode-card__label">Mode</span>
+            <span class="mode-card__value">
+              <span>Leverage</span>
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+                <path d="M1 3l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+          </button>
+
+          <!-- ↓↓↓ Identical markup to leverage-position/index.html .card ↓↓↓ -->
+          <section class="card" aria-label="Leverage position">
+            <div class="tabs" role="tablist">
+              <button type="button" class="tab is-active" role="tab" aria-selected="true" data-tab="leverage">
+                Leverage position
+              </button>
+              <button type="button" class="tab" role="tab" aria-selected="false" data-tab="exit">
+                Exit position
+              </button>
+            </div>
+
+            <div class="panel" data-panel="leverage">
+              <div class="panel__main">
+                <div class="market">
+                  <img class="market__thumb" src="assets/market-thumb.png" alt="" />
+                  <div class="market__info">
+                    <div class="market__meta">
+                      <span class="market__source">POLYMARKET • VOL $4.8M</span>
+                      <span class="market__delta">+5.4%</span>
+                    </div>
+                    <p class="market__title">Fed Rate Cut Dec?</p>
+                  </div>
+                </div>
+
+                <div class="side-buttons" role="tablist">
+                  <button type="button" class="side-btn side-btn--yes is-active" role="tab" aria-selected="true" data-side="yes">
+                    YES • 32¢
+                  </button>
+                  <button type="button" class="side-btn side-btn--no" role="tab" aria-selected="false" data-side="no">
+                    NO • 68¢
+                  </button>
+                </div>
+
+                <div class="amount-card">
+                  <div class="amount-card__head">
+                    <span class="amount-card__label">Amount</span>
+                    <span class="amount-card__wallet">WALLET: $1,200</span>
+                  </div>
+
+                  <div class="amount-card__field">
+                    <span class="amount-card__token">
+                      <img class="amount-card__token-icon" src="assets/usdc.svg" alt="" />
+                      <span class="amount-card__token-name">USDC</span>
+                    </span>
+                    <span class="amount-card__divider" aria-hidden="true"></span>
+                    <span class="amount-card__value">
+                      <span class="amount-card__currency">$</span>
+                      <input class="amount-card__input" type="number" min="0" step="0.01" placeholder="0.00" />
+                    </span>
+                  </div>
+
+                  <div class="percent-group" role="tablist">
+                    <button type="button" class="percent-btn" data-percent="25">25%</button>
+                    <button type="button" class="percent-btn" data-percent="50">50%</button>
+                    <button type="button" class="percent-btn" data-percent="75">75%</button>
+                    <button type="button" class="percent-btn" data-percent="100">MAX</button>
+                  </div>
+
+                  <p class="amount-card__error">Amount exceeds your wallet balance</p>
+                </div>
+
+                <div class="leverage-row">
+                  <div class="leverage-slider" data-value="0">
+                    <div class="leverage-slider__dots" aria-hidden="true">
+                      <span class="leverage-slider__dot"></span>
+                      <span class="leverage-slider__dot"></span>
+                      <span class="leverage-slider__dot"></span>
+                      <span class="leverage-slider__dot"></span>
+                      <span class="leverage-slider__dot"></span>
+                      <span class="leverage-slider__dot"></span>
+                    </div>
+                    <div class="leverage-slider__track" aria-hidden="true">
+                      <div class="leverage-slider__fill" aria-hidden="true"></div>
+                    </div>
+                    <input class="leverage-slider__input" type="range" min="0" max="5" step="0.01" value="0" aria-label="Leverage multiplier" />
+                  </div>
+                  <div class="leverage-value">
+                    <span class="leverage-value__num">0.00</span>
+                    <span class="leverage-value__suffix">×</span>
+                  </div>
+                </div>
+
+                <ul class="summary">
+                  <li class="summary__row">
+                    <span class="summary__label">Price impact</span>
+                    <span class="summary__value" data-summary="impact">0%</span>
+                  </li>
+                  <li class="summary__row">
+                    <span class="summary__label">Average price</span>
+                    <span class="summary__value" data-summary="avg">$0</span>
+                  </li>
+                  <li class="summary__row summary__row--divider">
+                    <span class="summary__label">Liquidation price</span>
+                    <span class="summary__value" data-summary="liq">$0</span>
+                  </li>
+                  <li class="summary__row">
+                    <span class="summary__label summary__label--bright">Estimated Reward</span>
+                    <span class="summary__value summary__value--bright" data-summary="reward">$0.00</span>
+                  </li>
+                </ul>
+
+                <div class="loading-overlay" id="leverage-loading" aria-hidden="true">
+                  <svg class="loading-spinner" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Loading">
+                    <g stroke="white" stroke-width="2" stroke-linecap="round">
+                      <line x1="16" y1="3" x2="16" y2="9" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.92" transform="rotate(30 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.85" transform="rotate(60 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.77" transform="rotate(90 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.69" transform="rotate(120 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.62" transform="rotate(150 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.54" transform="rotate(180 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.46" transform="rotate(210 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.38" transform="rotate(240 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.31" transform="rotate(270 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.23" transform="rotate(300 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.15" transform="rotate(330 16 16)" />
+                    </g>
+                  </svg>
+                </div>
+              </div>
+
+              <button type="button" class="action-btn" id="action-btn" disabled>
+                <span class="action-btn__label">Leverage</span>
+              </button>
+            </div>
+
+            <div class="panel" data-panel="exit" hidden>
+              <div class="panel__main">
+                <div class="market market--compact">
+                  <img class="market__thumb" src="assets/market-thumb.png" alt="" />
+                  <div class="market__info">
+                    <p class="market__title">Fed Rate Cut Dec?</p>
+                    <span class="market__source">POLYMARKET • VOL $4.8M</span>
+                  </div>
+                  <span class="side-tag side-tag--yes">YES</span>
+                </div>
+
+                <div class="amount-card">
+                  <div class="amount-card__head">
+                    <span class="amount-card__label">Amount</span>
+                    <span class="amount-card__wallet">VALUE:$4,200 • LEV:2×</span>
+                  </div>
+
+                  <div class="amount-card__field">
+                    <span class="amount-card__token">
+                      <img class="amount-card__token-icon" src="assets/usdc.svg" alt="" />
+                      <span class="amount-card__token-name">USDC</span>
+                    </span>
+                    <span class="amount-card__divider" aria-hidden="true"></span>
+                    <span class="amount-card__value">
+                      <span class="amount-card__currency">$</span>
+                      <input class="amount-card__input" id="exit-amount" type="number" min="0" step="0.01" placeholder="0.00" />
+                    </span>
+                  </div>
+
+                  <div class="percent-group" role="tablist">
+                    <button type="button" class="percent-btn" data-exit-percent="25">25%</button>
+                    <button type="button" class="percent-btn" data-exit-percent="50">50%</button>
+                    <button type="button" class="percent-btn" data-exit-percent="75">75%</button>
+                    <button type="button" class="percent-btn" data-exit-percent="100">MAX</button>
+                  </div>
+
+                  <p class="amount-card__error">Amount exceeds your position value</p>
+                </div>
+
+                <ul class="summary">
+                  <li class="summary__row">
+                    <span class="summary__label">Value</span>
+                    <span class="summary__value" data-exit-summary="value">$0</span>
+                  </li>
+                  <li class="summary__row">
+                    <span class="summary__label">Leverage</span>
+                    <span class="summary__value" data-exit-summary="leverage">2.0×</span>
+                  </li>
+                  <li class="summary__row">
+                    <span class="summary__label">Liquidation price</span>
+                    <span class="summary__value" data-exit-summary="liq">$0.00</span>
+                  </li>
+                  <li class="summary__row">
+                    <span class="summary__label">PnL</span>
+                    <span class="summary__value summary__value--pnl" data-exit-summary="pnl">+$0.00</span>
+                  </li>
+                  <li class="summary__row summary__row--divider summary__row--muted">
+                    <span class="summary__label">Network Fee</span>
+                    <span class="summary__value" data-exit-summary="fee">~$0.00</span>
+                  </li>
+                  <li class="summary__row">
+                    <span class="summary__label summary__label--bright">Estimated Reward</span>
+                    <span class="summary__value summary__value--bright" data-exit-summary="reward">$0.00</span>
+                  </li>
+                </ul>
+
+                <div class="hf">
+                  <div class="hf__head">
+                    <span class="hf__label">Health Factor Impact</span>
+                    <span class="hf__delta">
+                      <span class="hf__before" data-hf="before">1.45</span>
+                      <span class="hf__arrow"> → </span>
+                      <span class="hf__after" data-hf="after">1.45</span>
+                    </span>
+                  </div>
+                  <div class="hf__bar-wrap">
+                    <div class="hf__bar">
+                      <div class="hf__bar-half hf__bar-half--red"></div>
+                      <div class="hf__bar-half hf__bar-half--green"></div>
+                      <div class="hf__indicator" data-hf="indicator" style="left: 72.5%"></div>
+                    </div>
+                    <div class="hf__scale">
+                      <span>0.0</span>
+                      <span>1.0</span>
+                      <span>2.0</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="loading-overlay" id="exit-loading" aria-hidden="true">
+                  <svg class="loading-spinner" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Loading">
+                    <g stroke="white" stroke-width="2" stroke-linecap="round">
+                      <line x1="16" y1="3" x2="16" y2="9" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.92" transform="rotate(30 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.85" transform="rotate(60 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.77" transform="rotate(90 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.69" transform="rotate(120 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.62" transform="rotate(150 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.54" transform="rotate(180 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.46" transform="rotate(210 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.38" transform="rotate(240 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.31" transform="rotate(270 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.23" transform="rotate(300 16 16)" />
+                      <line x1="16" y1="3" x2="16" y2="9" opacity="0.15" transform="rotate(330 16 16)" />
+                    </g>
+                  </svg>
+                </div>
+              </div>
+
+              <button type="button" class="close-btn" id="close-btn" disabled>
+                <span class="close-btn__label">Close Position</span>
+              </button>
+            </div>
+          </section>
+        </aside>
+      </div>
+    </main>
+
+    <!-- Success popups (Open + Close) — leverage.js wires these up. Markup is
+         copied verbatim from leverage-position/index.html. -->
+    <div class="popup-overlay" id="success-overlay" role="dialog" aria-modal="true" hidden>
+      <section class="popup popup--success">
+        <button type="button" class="popup__close" id="success-close" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </button>
+
+        <div class="success-hero">
+          <div class="success-hero__ring success-hero__ring--book" aria-hidden="true">
+            <svg class="book-icon" width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <path class="book-icon__left"
+                    d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"
+                    stroke="white" stroke-width="1.6"
+                    stroke-linejoin="round" stroke-linecap="round" />
+              <path class="book-icon__right"
+                    d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"
+                    stroke="white" stroke-width="1.6"
+                    stroke-linejoin="round" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div class="success-hero__copy">
+            <h2 class="success-hero__title">Position Opened</h2>
+            <p class="success-hero__desc">Your leveraged position is now active on Varla.</p>
+          </div>
+        </div>
+
+        <div class="success-cards">
+          <ul class="success-card">
+            <li class="success-row">
+              <span class="success-row__label">Market</span>
+              <span class="success-row__value success-row__value--link">
+                <svg class="success-row__icon" width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                  <path d="M10.5 10.5 L4 4 M4 4 L4 8.5 M4 4 L8.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span class="success-row__link-text" data-success="market">Fed Rate Cut Dec?</span>
+              </span>
+            </li>
+            <li class="success-row">
+              <span class="success-row__label">Position side</span>
+              <span class="side-tag side-tag--yes side-tag--sm" data-success="side">YES</span>
+            </li>
+            <li class="success-row">
+              <span class="success-row__label">Trade amount</span>
+              <span class="success-row__value" data-success="amount">$0.00</span>
+            </li>
+            <li class="success-row">
+              <span class="success-row__label">Leverage</span>
+              <span class="success-row__value" data-success="leverage">0×</span>
+            </li>
+          </ul>
+
+          <ul class="success-card">
+            <li class="success-row">
+              <span class="success-row__label">Avg entry price</span>
+              <span class="success-row__value" data-success="avgEntry">0¢</span>
+            </li>
+            <li class="success-row">
+              <span class="success-row__label">Shares received</span>
+              <span class="success-row__value" data-success="shares">0 SHARES</span>
+            </li>
+            <li class="success-row">
+              <span class="success-row__label">Liquidation price</span>
+              <span class="success-row__value" data-success="liq">0¢</span>
+            </li>
+            <li class="success-row success-row--accent">
+              <span class="success-row__label">Estimated reward</span>
+              <span class="success-row__value success-row__value--bright" data-success="reward">$0.00</span>
+            </li>
+          </ul>
+        </div>
+
+        <button type="button" class="popup-btn popup-btn--primary" id="success-done">Done</button>
+      </section>
+    </div>
+
+    <div class="popup-overlay" id="exit-success-overlay" role="dialog" aria-modal="true" hidden>
+      <section class="popup popup--success">
+        <button type="button" class="popup__close" id="exit-success-close" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M1 1L13 13M1 13L13 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </button>
+
+        <div class="success-hero">
+          <div class="success-hero__ring success-hero__ring--book" aria-hidden="true">
+            <svg class="book-icon book-icon--closing" width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <path class="book-icon__left"
+                    d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"
+                    stroke="white" stroke-width="1.6"
+                    stroke-linejoin="round" stroke-linecap="round" />
+              <path class="book-icon__right"
+                    d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"
+                    stroke="white" stroke-width="1.6"
+                    stroke-linejoin="round" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div class="success-hero__copy">
+            <h2 class="success-hero__title">Position Closed</h2>
+            <p class="success-hero__desc">Your position has been settled and funds returned to your wallet.</p>
+          </div>
+        </div>
+
+        <div class="success-cards">
+          <ul class="success-card">
+            <li class="success-row">
+              <span class="success-row__label">Market</span>
+              <span class="success-row__value success-row__value--link">
+                <svg class="success-row__icon" width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                  <path d="M10.5 10.5 L4 4 M4 4 L4 8.5 M4 4 L8.5 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span class="success-row__link-text" data-exit-success="market">Fed Rate Cut Dec?</span>
+              </span>
+            </li>
+            <li class="success-row">
+              <span class="success-row__label">Position side</span>
+              <span class="side-tag side-tag--yes side-tag--sm" data-exit-success="side">YES</span>
+            </li>
+            <li class="success-row">
+              <span class="success-row__label">Leverage</span>
+              <span class="success-row__value" data-exit-success="leverage">2.0×</span>
+            </li>
+            <li class="success-row">
+              <span class="success-row__label">Closed amount</span>
+              <span class="success-row__value" data-exit-success="closedAmount">$0.00</span>
+            </li>
+          </ul>
+
+          <ul class="success-card">
+            <li class="success-row">
+              <span class="success-row__label">Avg exit price</span>
+              <span class="success-row__value" data-exit-success="exitPrice">0¢</span>
+            </li>
+            <li class="success-row">
+              <span class="success-row__label">Realized PnL</span>
+              <span class="success-row__value success-row__value--profit" data-exit-success="pnl">+$0.00</span>
+            </li>
+            <li class="success-row">
+              <span class="success-row__label">Network fee</span>
+              <span class="success-row__value" data-exit-success="fee">~$0.00</span>
+            </li>
+            <li class="success-row success-row--accent">
+              <span class="success-row__label">Net received</span>
+              <span class="success-row__value success-row__value--bright" data-exit-success="netReceived">$0.00</span>
+            </li>
+          </ul>
+        </div>
+
+        <button type="button" class="popup-btn popup-btn--primary" id="exit-success-done">Done</button>
+      </section>
+    </div>
 
     <script src="market.js"></script>
   </body>
