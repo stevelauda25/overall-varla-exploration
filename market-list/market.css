@@ -3901,14 +3901,18 @@ img { display: block; max-width: 100%; }
 
 .pnl-graph__x-axis {
   display: flex;
-  gap: 40px;
+  justify-content: space-between;
+  gap: 16px;
+  /* Match the plot column on the left + leave a gutter on the right
+     equal to the y-axis (49px) plus its 16px gap. */
+  padding-right: 65px;
   font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.44px;
   line-height: 1.1;
   color: var(--text-secondary);
+  text-transform: uppercase;
   white-space: nowrap;
-  overflow: hidden;
 }
 
 /* =========================================================================
