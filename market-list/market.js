@@ -2072,13 +2072,17 @@ detailTabs.forEach((tab) => {
   const HOUR = 60 * MINUTE;
   const DAY = 24 * HOUR;
 
+  // xTicks chosen so each label lands on a clean calendar boundary —
+  // ALL: 5 ticks → 6-month uniform gaps (APR/OCT). 1Y: 5 ticks →
+  // 3-month uniform gaps. Smaller windows already snap naturally
+  // because their gaps are sub-monthly.
   const periods = {
     "1H":  { spanMs: 1 * HOUR,    points: 60,  xTicks: 6 },
     "6H":  { spanMs: 6 * HOUR,    points: 72,  xTicks: 6 },
     "1W":  { spanMs: 7 * DAY,     points: 168, xTicks: 7 },
     "1M":  { spanMs: 30 * DAY,    points: 60,  xTicks: 5 },
-    "1Y":  { spanMs: 365 * DAY,   points: 52,  xTicks: 6 },
-    "ALL": { spanMs: 730 * DAY,   points: 80,  xTicks: 11 },
+    "1Y":  { spanMs: 365 * DAY,   points: 52,  xTicks: 5 },
+    "ALL": { spanMs: 730 * DAY,   points: 80,  xTicks: 5 },
   };
 
   // Fixed dollar window the chart visualizes — matches the y-axis labels
@@ -2160,10 +2164,26 @@ detailTabs.forEach((tab) => {
     const slice = masterSeries.slice(lo);
     if (slice.length <= cfg.points) return slice;
 
+    // Downsample by TIME so the resulting series has uniform time
+    // intervals — see the probability graph's getPeriodSeries for the
+    // full reasoning. Without this, the multi-resolution master would
+    // make the last 24h take a disproportionate slice of the chart.
+    const tStart = slice[0].t;
+    const tEnd = slice[slice.length - 1].t;
     const out = new Array(cfg.points);
+    let searchIdx = 0;
     for (let i = 0; i < cfg.points; i++) {
-      const idx = Math.round((i * (slice.length - 1)) / (cfg.points - 1));
-      out[i] = slice[idx];
+      const targetT = tStart + (i * (tEnd - tStart)) / (cfg.points - 1);
+      while (searchIdx < slice.length - 1 && slice[searchIdx + 1].t < targetT) {
+        searchIdx++;
+      }
+      let pickIdx = searchIdx;
+      if (searchIdx + 1 < slice.length) {
+        const dCurrent = Math.abs(slice[searchIdx].t - targetT);
+        const dNext = Math.abs(slice[searchIdx + 1].t - targetT);
+        if (dNext < dCurrent) pickIdx = searchIdx + 1;
+      }
+      out[i] = slice[pickIdx];
     }
     return out;
   }
