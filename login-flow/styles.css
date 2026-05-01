@@ -109,6 +109,22 @@ input {
   display: none;
 }
 
+/* Soft cross-fade when a view becomes visible (welcome ↔ wallet ↔ email ↔
+   confirm ↔ wallet-connect). 150ms ease-out keeps the multi-step flow from
+   feeling like a hard cut without slowing the user down. */
+.login-modal:not(.is-hidden) {
+  animation: loginViewFadeIn 150ms ease-out;
+}
+
+@keyframes loginViewFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Shared title — used on both welcome hero and email topbar */
 .login-modal__title {
   margin: 0;
@@ -344,7 +360,7 @@ input {
 .wallet-grid::-webkit-scrollbar-thumb {
   background-color: transparent;
   border-radius: 3px;
-  transition: background-color 0.4s ease;
+  transition: background-color 0.25s ease-out;
 }
 
 .wallet-grid.is-scrolling::-webkit-scrollbar-thumb {
@@ -1029,7 +1045,7 @@ input {
     0 4px 4px 0 rgba(0, 0, 0, 0.1),
     inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
   transform: scale(0.96);
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease-out;
 }
 
 .success-overlay.is-open .success-modal {
@@ -1139,4 +1155,20 @@ input {
   font-size: 16px;
   line-height: 1.3;
   color: var(--text-secondary);
+}
+
+/* =========================================================================
+   Reduced motion — respect OS preference
+   Collapses every transition/animation to a near-instant duration so users
+   who request reduced motion still get the final state without the motion.
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
