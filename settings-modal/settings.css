@@ -493,7 +493,7 @@ img {
   z-index: 100;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease-out;
 }
 
 .popup-overlay.is-open {
@@ -517,7 +517,7 @@ img {
     inset 0 0 3px 2px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transform: scale(0.97);
-  transition: transform 0.25s ease;
+  transition: transform 0.2s ease-out;
 }
 
 .popup-overlay.is-open .popup {
@@ -814,7 +814,7 @@ img {
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.5),
     inset 0 -1px 1px rgba(0, 0, 0, 0.15);
-  transition: left 0.18s ease;
+  transition: transform 0.18s ease-in-out;
 }
 
 .toggle[aria-pressed="true"] .toggle__track {
@@ -823,7 +823,7 @@ img {
 }
 
 .toggle[aria-pressed="true"] .toggle__knob {
-  left: 14px;
+  transform: translate(12px, -50%);
 }
 
 .toggle:focus-visible {
@@ -1085,4 +1085,18 @@ img {
 .connect-pill svg {
   flex-shrink: 0;
   color: var(--accent-green);
+}
+
+/* =========================================================================
+   Reduced motion — respect OS preference
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
