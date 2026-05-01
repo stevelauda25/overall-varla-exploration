@@ -579,7 +579,7 @@ body[data-tab="not-supported"] .filter-menu__item[data-supported-only] {
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.5),
     inset 0 -1px 1px rgba(0, 0, 0, 0.15);
-  transition: left 0.18s ease;
+  transition: transform 0.18s ease-in-out;
 }
 
 .switch input:checked ~ .switch__track {
@@ -588,7 +588,7 @@ body[data-tab="not-supported"] .filter-menu__item[data-supported-only] {
 }
 
 .switch input:checked ~ .switch__track .switch__knob {
-  left: 14px;
+  transform: translate(12px, -50%);
 }
 
 /* ---- Segmented controls ---- */
@@ -2057,7 +2057,7 @@ img { display: block; max-width: 100%; }
   transform: translate(-50%, -50%);
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
-  transition: left 0.3s ease;
+  transition: left 0.3s ease-in-out;
 }
 
 .hf__scale {
@@ -2213,7 +2213,7 @@ img { display: block; max-width: 100%; }
   z-index: 100;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease-out;
 }
 
 .popup-overlay.is-open {
@@ -2233,7 +2233,7 @@ img { display: block; max-width: 100%; }
   box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transform: scale(0.97);
-  transition: transform 0.25s ease;
+  transition: transform 0.2s ease-out;
 }
 
 .popup-overlay.is-open .popup { transform: scale(1); }
@@ -4004,4 +4004,18 @@ img { display: block; max-width: 100%; }
 
 .ta-date { color: var(--text-primary); }
 .ta-time { color: var(--text-secondary); }
+
+/* =========================================================================
+   Reduced motion — respect OS preference
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
