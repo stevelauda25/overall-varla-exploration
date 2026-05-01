@@ -505,9 +505,8 @@ input {
   transform: scale(0.85);
   pointer-events: none;
   transition:
-    opacity 0.25s ease,
-    transform 0.25s ease,
-    bottom 0.25s ease,
+    opacity 0.25s ease-out,
+    transform 0.25s ease-out,
     background 0.12s ease;
   z-index: 5;
 }
@@ -518,10 +517,15 @@ input {
   pointer-events: auto;
 }
 
-/* Lift above the bottom-stuck pinned row with a 16px gap.
-   72 = 16 (gap) + 56 (pinned row height) */
+/* Lift above the bottom-stuck pinned row with a 16px gap (56px = pinned row
+   height). Animate transform instead of `bottom` to keep the move on the GPU
+   and off the layout pass. */
 .back-to-top.above-pinned {
-  bottom: 72px;
+  transform: scale(0.85) translateY(-56px);
+}
+
+.back-to-top.is-visible.above-pinned {
+  transform: scale(1) translateY(-56px);
 }
 
 .back-to-top:hover {
@@ -779,4 +783,18 @@ input {
 .range-input__number::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* =========================================================================
+   Reduced motion — respect OS preference
+   ========================================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
