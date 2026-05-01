@@ -93,10 +93,11 @@ function refreshSummary() {
     weightedLiq += value * liq;
   });
 
-  animateNumber(selectedCountEl, active.length, fmtInt);
+  // 350ms tween for summary updates (Package A, item 4)
+  animateNumber(selectedCountEl, active.length, fmtInt, 350);
   totalCountEl.textContent = positions.length; // never changes, no anim
-  animateNumber(totalCollateralEl, totalCollateral, fmtCurrency);
-  animateNumber(estimatedMaxLoanEl, maxLoan, fmtCurrency);
+  animateNumber(totalCollateralEl, totalCollateral, fmtCurrency, 350);
+  animateNumber(estimatedMaxLoanEl, maxLoan, fmtCurrency, 350);
 
   // Disable the deposit button when nothing is selected
   depositButton.disabled = active.length === 0;
@@ -104,23 +105,78 @@ function refreshSummary() {
   refreshHealthFactor(active.length, weightedLiq);
 }
 
+/* Compute indicator color from its position along the bar.
+   Reversed mapping: pct=0 (HF=0, riskiest) is red; pct=1 (HF=2, safest) is green. */
+function hfColorFor(pct) {
+  // Hue: 0 (red) → 60 (yellow) → 120 (green)
+  const hue = Math.max(0, Math.min(120, pct * 120));
+  return `hsl(${hue}, 70%, 65%)`;
+}
+
+/* Convert HF (0..HF_SCALE_MAX) into a px offset along the bar's width. */
+function hfPositionPx(hf) {
+  const barWidth = hfIndicatorEl.parentElement?.clientWidth || 0;
+  const clamped = Math.min(HF_SCALE_MAX, Math.max(0, hf));
+  return (clamped / HF_SCALE_MAX) * barWidth;
+}
+
+/* Track the last applied indicator offset (px) so we can detect large jumps
+   for the trail effect. Initialized lazily to current center on first read. */
+let _hfLastPx = null;
+
+function applyHfPosition(hf, { animateGhost = true } = {}) {
+  const targetPx = hfPositionPx(hf);
+  const pct = Math.min(1, Math.max(0, hf / HF_SCALE_MAX));
+  const color = hfColorFor(pct);
+
+  // Trail: if moving more than 15% of bar in one update, drop 2 ghosts
+  if (
+    animateGhost &&
+    _hfLastPx !== null &&
+    hfIndicatorEl.parentElement
+  ) {
+    const barWidth = hfIndicatorEl.parentElement.clientWidth || 1;
+    const delta = Math.abs(targetPx - _hfLastPx);
+    if (delta / barWidth > 0.15) {
+      spawnHfGhosts(_hfLastPx, targetPx, color);
+    }
+  }
+
+  hfIndicatorEl.style.setProperty("--hf-x", targetPx + "px");
+  hfIndicatorEl.style.setProperty("--hf-color", color);
+  _hfLastPx = targetPx;
+}
+
+function spawnHfGhosts(fromPx, toPx, color) {
+  const parent = hfIndicatorEl.parentElement;
+  if (!parent) return;
+  // Two intermediate ghosts at 33% and 66% of the journey
+  [0.33, 0.66].forEach((t) => {
+    const ghost = document.createElement("div");
+    ghost.className = "hf-ghost";
+    const pos = fromPx + (toPx - fromPx) * t;
+    ghost.style.setProperty("--hf-x", pos + "px");
+    ghost.style.setProperty("--hf-color", color);
+    parent.appendChild(ghost);
+    ghost.addEventListener("animationend", () => ghost.remove(), { once: true });
+  });
+}
+
 function refreshHealthFactor(activeCount, weightedLiq) {
   if (activeCount === 0) {
     // No positions selected → reset to default placeholder
-    animateNumber(hfValueEl, HF_DEFAULT_VALUE, fmtDecimal2);
+    animateNumber(hfValueEl, HF_DEFAULT_VALUE, fmtDecimal2, 350);
     hfValueEl.classList.remove("is-danger");
-    hfIndicatorEl.style.left = "50%";
+    hfIndicatorEl.classList.remove("is-risky");
+    applyHfPosition(HF_DEFAULT_VALUE);
     hfBarRedEl.style.opacity = "0.5";
     hfBarGreenEl.style.opacity = "0.5";
     return;
   }
 
   const hf = weightedLiq / EXISTING_DEBT;
-  animateNumber(hfValueEl, hf, fmtDecimal2);
-
-  // Position the indicator on the 0–2 scale
-  const clamped = Math.min(HF_SCALE_MAX, Math.max(0, hf));
-  hfIndicatorEl.style.left = (clamped / HF_SCALE_MAX) * 100 + "%";
+  animateNumber(hfValueEl, hf, fmtDecimal2, 350);
+  applyHfPosition(hf);
 
   // Light the half the indicator is sitting on, and color the number to match:
   //   HF < 1.0  → danger zone (left/red half)  → red highlights, value goes red
@@ -129,6 +185,8 @@ function refreshHealthFactor(activeCount, weightedLiq) {
   hfBarRedEl.style.opacity = inDanger ? "1" : "0.5";
   hfBarGreenEl.style.opacity = inDanger ? "0.5" : "1";
   hfValueEl.classList.toggle("is-danger", inDanger);
+  // Risky pulse fires when value is in the danger zone
+  hfIndicatorEl.classList.toggle("is-risky", inDanger);
 }
 
 positions.forEach((position) => {
@@ -147,6 +205,42 @@ positions.forEach((position) => {
 
 // Initialize on first paint so the summary reflects the markup state.
 refreshSummary();
+
+// HF indicator depends on bar pixel width — recompute on resize so the dot
+// stays aligned. Skip ghost trails for resize updates.
+window.addEventListener("resize", () => {
+  const hfText = hfValueEl._numCurrent ?? HF_DEFAULT_VALUE;
+  applyHfPosition(hfText, { animateGhost: false });
+});
+
+/* ---------------------------------------------------------------------------
+   Modal entrance cascade — children "wake up" in sequence on first paint.
+   --------------------------------------------------------------------------- */
+(function playEntranceCascade() {
+  const modalEl = document.querySelector(".modal");
+  if (!modalEl) return;
+
+  // Tag each row with its index so CSS can stagger animation-delay
+  positions.forEach((p, i) => p.style.setProperty("--row-i", i));
+
+  const rowCount = positions.length;
+  const rowDelay = 30; // ms
+  modalEl.style.setProperty(
+    "--summary-delay",
+    rowCount * rowDelay + 80 + "ms",
+  );
+  modalEl.style.setProperty(
+    "--footer-delay",
+    rowCount * rowDelay + 200 + "ms",
+  );
+
+  modalEl.classList.add("is-entering");
+
+  // Remove the entering class after the cascade finishes so it doesn't
+  // re-trigger on subsequent state changes (e.g. toggle clicks).
+  const totalMs = rowCount * rowDelay + 200 + 220 + 50;
+  setTimeout(() => modalEl.classList.remove("is-entering"), totalMs);
+})();
 
 /* ---------------------------------------------------------------------------
    Custom overlay scrollbar
@@ -247,19 +341,16 @@ function openSuccess() {
   successCollateralEl._numCurrent = 0;
   successLoanEl._numCurrent = 0;
   successHfValueEl._numCurrent = 0;
+  successSelectedEl.textContent = "0";
+  successCollateralEl.textContent = fmtCurrency(0);
+  successLoanEl.textContent = fmtCurrency(0);
+  successHfValueEl.textContent = fmtDecimal2(0);
 
-  animateNumber(successSelectedEl, selected, fmtInt);
-  animateNumber(successCollateralEl, collateral, fmtCurrency);
-  animateNumber(successLoanEl, loan, fmtCurrency);
-  animateNumber(successHfValueEl, hf, fmtDecimal2);
-
-  // Visual states (color, indicator position, bar opacities) are copied
-  // directly — no tween, they should match the deposit modal's final state.
+  // Visual states copied directly — match the deposit modal's final state.
   successHfValueEl.classList.toggle(
     "is-danger",
     hfValueEl.classList.contains("is-danger"),
   );
-  successHfIndicatorEl.style.left = hfIndicatorEl.style.left || "50%";
   successHfRedEl.style.opacity = hfBarRedEl.style.opacity || "0.5";
   successHfGreenEl.style.opacity = hfBarGreenEl.style.opacity || "0.5";
 
@@ -267,6 +358,63 @@ function openSuccess() {
   mainModalEl.classList.add("is-hidden");
   mainModalEl.setAttribute("aria-hidden", "true");
   successOverlay.classList.add("is-open");
+
+  // Place the success indicator immediately at the matching position. We do
+  // this in a rAF so the overlay's layout is settled and we get a real width.
+  requestAnimationFrame(() => {
+    const barWidth =
+      successHfIndicatorEl.parentElement?.clientWidth || 0;
+    const clamped = Math.min(HF_SCALE_MAX, Math.max(0, hf));
+    const px = (clamped / HF_SCALE_MAX) * barWidth;
+    const pct = clamped / HF_SCALE_MAX;
+    successHfIndicatorEl.style.setProperty("--hf-x", px + "px");
+    successHfIndicatorEl.style.setProperty("--hf-color", hfColorFor(pct));
+    successHfIndicatorEl.classList.toggle("is-risky", hf < 1.0);
+  });
+
+  // Count up from 0 to final values — kicks in after the halo starts (700ms)
+  // and lasts 500ms. (Package C item 4.)
+  setTimeout(() => {
+    if (!successOverlay.classList.contains("is-open")) return;
+    animateNumber(successSelectedEl, selected, fmtInt, 500);
+    animateNumber(successCollateralEl, collateral, fmtCurrency, 500);
+    animateNumber(successLoanEl, loan, fmtCurrency, 500);
+    animateNumber(successHfValueEl, hf, fmtDecimal2, 500);
+  }, 700);
+
+  // Confetti burst — fires shortly after the icon bounce settles
+  setTimeout(() => {
+    if (!successOverlay.classList.contains("is-open")) return;
+    spawnConfetti();
+  }, 750);
+}
+
+/* Inject 10 confetti dots that fan out from the success icon center.
+   Each dot is removed on animationend. */
+function spawnConfetti() {
+  const ring = successOverlay.querySelector(".success-modal__icon-ring");
+  if (!ring) return;
+  const count = 10;
+  for (let i = 0; i < count; i++) {
+    const dot = document.createElement("span");
+    dot.className = "confetti";
+    const angle = (i / count) * Math.PI * 2 + Math.random() * 0.4;
+    const distance = 40 + Math.random() * 30;
+    const x = Math.cos(angle) * distance;
+    const y = Math.sin(angle) * distance;
+    dot.style.setProperty("--confetti-x", x + "px");
+    dot.style.setProperty("--confetti-y", y + "px");
+    dot.style.setProperty(
+      "--confetti-start-scale",
+      (0.5 + Math.random() * 0.3).toFixed(2),
+    );
+    dot.style.setProperty(
+      "--confetti-end-scale",
+      (0.2 + Math.random() * 0.2).toFixed(2),
+    );
+    ring.appendChild(dot);
+    dot.addEventListener("animationend", () => dot.remove(), { once: true });
+  }
 }
 
 function closeSuccess() {
