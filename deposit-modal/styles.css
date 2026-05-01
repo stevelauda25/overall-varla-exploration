@@ -186,21 +186,6 @@ img {
   pointer-events: auto;
 }
 
-/* Spoke-star spinner — 12 rays, decreasing opacity around the circle.
-   `steps(12)` rotates 30° per tick, advancing the bright ray clockwise. */
-.loading-spinner {
-  width: 32px;
-  height: 32px;
-  animation: loading-tick 1s steps(12) infinite;
-  transform-origin: center;
-}
-
-@keyframes loading-tick {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .modal__description {
   text-align: center;
   font-size: 16px;
@@ -313,6 +298,18 @@ img {
   background: var(--foreground-primary);
   border: 1px solid var(--alpha-white-800);
   border-radius: var(--card-radius);
+  /* Springy breathe when toggling on/off — overshoots slightly */
+  transition:
+    transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 220ms ease-out;
+}
+
+.position[data-active="false"] {
+  transform: scale(0.985);
+}
+
+.position[data-active="true"] {
+  transform: scale(1);
 }
 
 .position__info {
@@ -406,7 +403,21 @@ img {
   border-radius: inherit;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  transition: background 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+/* Green fill that scales out from the left when toggle activates.
+   Pseudo holds the gradient; base track stays neutral. */
+.toggle__track::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #d9ed9c 0%, #a9c95f 100%);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 200ms ease-out;
 }
 
 .toggle__knob {
@@ -421,12 +432,16 @@ img {
   box-shadow:
     0 1px 2px rgba(0, 0, 0, 0.5),
     inset 0 -1px 1px rgba(0, 0, 0, 0.15);
-  transition: transform 0.18s ease-in-out;
+  /* Springy overshoot — knob lands with a tiny bounce */
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .toggle[aria-pressed="true"] .toggle__track {
-  background: linear-gradient(180deg, #d9ed9c 0%, #a9c95f 100%);
   border-color: rgba(195, 227, 130, 0.5);
+}
+
+.toggle[aria-pressed="true"] .toggle__track::before {
+  transform: scaleX(1);
 }
 
 .toggle[aria-pressed="true"] .toggle__knob {
@@ -575,17 +590,62 @@ img {
 
 .health-factor__indicator {
   position: absolute;
-  left: 50%;
+  left: 0;
   top: 50%;
   width: 12px;
   height: 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--hf-color, rgba(255, 255, 255, 0.5));
   outline: 2px solid var(--base-white);
-  transform: translate(-50%, -50%);
+  /* --hf-x is a px offset along the bar set by JS; -50%/-50% centers the dot */
+  transform: translate(calc(var(--hf-x, 0px) - 50%), -50%) scale(var(--hf-scale, 1));
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
-  transition: left 0.3s ease-in-out;
+  /* Springy overshoot when slide updates */
+  transition:
+    transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+/* Risk pulse — scales/glows in a loop while in the danger zone.
+   Delayed so the slide-in transition completes first. */
+.health-factor__indicator.is-risky {
+  animation: hf-risk-pulse 1.4s ease-in-out 350ms infinite;
+}
+
+@keyframes hf-risk-pulse {
+  0%, 100% {
+    transform: translate(calc(var(--hf-x, 0px) - 50%), -50%) scale(1);
+    box-shadow: 0 0 0 transparent;
+  }
+  50% {
+    transform: translate(calc(var(--hf-x, 0px) - 50%), -50%) scale(1.18);
+    box-shadow: 0 0 12px rgba(255, 100, 100, 0.5);
+  }
+}
+
+/* Trail ghost left in the wake of a large indicator move */
+.hf-ghost {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--hf-color, rgba(255, 255, 255, 0.5));
+  outline: 2px solid var(--base-white);
+  transform: translate(calc(var(--hf-x, 0px) - 50%), -50%);
+  pointer-events: none;
+  opacity: 0.6;
+  animation: hf-ghost-fade 400ms ease-out forwards;
+}
+
+@keyframes hf-ghost-fade {
+  to {
+    opacity: 0;
+    transform: translate(calc(var(--hf-x, 0px) - 50%), -50%) scale(0.7);
+  }
 }
 
 .health-factor__scale {
@@ -883,6 +943,176 @@ img {
   font-size: 16px;
   line-height: 1.3;
   color: var(--text-secondary);
+}
+
+/* =========================================================================
+   Modal entrance cascade — children "wake up" in sequence on first paint.
+   `.is-entering` is set on .modal by JS on load; removed after the cascade
+   so toggle interactions don't re-trigger these animations.
+   ========================================================================= */
+.modal.is-entering .position {
+  opacity: 0;
+  transform: translateY(8px) scale(var(--enter-scale, 1));
+  animation: modal-enter-row 220ms ease-out forwards;
+  animation-delay: calc(var(--row-i, 0) * 30ms);
+}
+
+/* Active rows start at scale 1, inactive at 0.985, matching the resting state */
+.modal.is-entering .position[data-active="false"] {
+  --enter-scale: 0.985;
+}
+
+.modal.is-entering .summary-column {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: modal-enter-block 220ms ease-out forwards;
+  animation-delay: var(--summary-delay, 290ms);
+}
+
+.modal.is-entering .modal__footer {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: modal-enter-block 220ms ease-out forwards;
+  animation-delay: var(--footer-delay, 410ms);
+}
+
+/* Skip the indicator transition during the entrance cascade so it lands
+   at its computed position immediately rather than sliding in from 0. */
+.modal.is-entering .health-factor__indicator {
+  transition: none;
+}
+
+@keyframes modal-enter-row {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(var(--enter-scale, 1));
+  }
+}
+
+@keyframes modal-enter-block {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================================
+   Deposit button — shimmer sweep while loading
+   ========================================================================= */
+.deposit-button.is-loading .deposit-button__pattern {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: -100% 0;
+  opacity: 0.7;
+  animation: deposit-shimmer 1400ms linear infinite;
+}
+
+@keyframes deposit-shimmer {
+  to {
+    background-position: 100% 0;
+  }
+}
+
+/* =========================================================================
+   Loading overlay — breathing diamond replaces the spoke spinner
+   ========================================================================= */
+.loading-diamond {
+  width: 28px;
+  height: 28px;
+  display: block;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+  transform: rotate(45deg);
+  transform-origin: center;
+}
+
+.loading-overlay.is-active .loading-diamond {
+  animation: loading-diamond-breathe 1600ms ease-in-out infinite;
+}
+
+@keyframes loading-diamond-breathe {
+  0%, 100% {
+    transform: rotate(45deg) scale(0.85);
+    opacity: 0.55;
+  }
+  50% {
+    transform: rotate(45deg) scale(1.15);
+    opacity: 1;
+  }
+}
+
+/* =========================================================================
+   Success — radial halo expanding outward after the icon bounce
+   ========================================================================= */
+.success-modal__icon-ring {
+  position: relative;
+}
+
+.success-modal__icon-ring::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.4) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1);
+}
+
+.success-overlay.is-open .success-modal__icon-ring::before {
+  animation: success-halo 800ms ease-out 0.7s forwards;
+}
+
+@keyframes success-halo {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+/* Confetti particles — small white circles bursting from icon center */
+.confetti {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #ffffff;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.6);
+  animation: confetti-burst 700ms ease-out forwards;
+}
+
+@keyframes confetti-burst {
+  0% {
+    opacity: 1;
+    transform:
+      translate(-50%, -50%)
+      scale(var(--confetti-start-scale, 0.6));
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(
+        calc(-50% + var(--confetti-x, 0px)),
+        calc(-50% + var(--confetti-y, 0px))
+      )
+      scale(var(--confetti-end-scale, 0.3));
+  }
 }
 
 /* =========================================================================
